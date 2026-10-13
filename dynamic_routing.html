@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dynamic Routing Video Generator</title>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="theme-color" content="#a0826d">
+  <link rel="apple-touch-icon" href="/static/favicon.svg">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <style>
+    :root {
+      --bg: linear-gradient(135deg, #e8dcc8 0%, #dab89a 50%, #a0826d 100%);
+      --card: #ffffff;
+      --text:  #000000;
+      --accent: #6366f1;
+      --accent-light: #a5b4fc;
+      --border: #f8bbd0;
+      --success: #10b981;
+      --error: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      padding: 0;
+      transition: background 0.3s ease;
+    }
+
+    header {
+      background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+      color:  #000000;
+      padding: 24px 20px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    header p {
+      margin: 8px 0 0 0;
+      font-size: 13px;
+      font-weight: 500;
+      opacity: 0.95;
+      letter-spacing: 0.5px;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 30px 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      animation: slideUp 0.4s ease;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .panel {
+      padding: 30px;
+      border-radius: 20px;
+      background: var(--card);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.1);
+    }
+
+    h2 {
+      margin: 0 0 24px 0;
+      font-size: 24px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color:  #000000;
+      background-clip: text;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--accent);
+      font-size: 12px;
+    }
+
+    input[type="number"],
+    select {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 2px solid var(--border);
+      outline: none;
+      font-size: 14px;
+      background: var(--card);
+      color: var(--text);
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+
+    input[type="number"]:hover,
+    select:hover {
+      border-color: var(--accent);
+    }
+
+    input[type="number"]:focus,
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    button {
+      width: 100%;
+      padding: 13px;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+      color:  #000000;
+      font-size: 15px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    }
+
+    button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 25px rgba(99, 102, 241, 0.4);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .video-section {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    video {
+      width: 100%;
+      border-radius: 12px;
+      background: var(--text);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .metrics-box {
+      background: rgba(99, 102, 241, 0.08);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .metric-item {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 12px;
+      border-radius: 8px;
+      border-left: 3px solid var(--success);
+      text-align: center;
+    }
+
+    .metric-label {
+      color: var(--border);
+      font-size: 11px;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .metric-value {
+      color: var(--success);
+      font-weight: 700;
+      font-size: 18px;
+      margin-top: 6px;
+    }
+
+    .path-route {
+      background: rgba(99, 102, 241, 0.08);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      border-radius: 8px;
+      padding: 12px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      color: var(--accent);
+      margin-top: 15px;
+    }
+
+    .spinner {
+      border: 3px solid rgba(99, 102, 241, 0.2);
+      border-top: 3px solid var(--accent);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .loading p {
+      color: var(--text);
+      margin-top: 15px;
+      font-weight: 600;
+    }
+
+    .error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: var(--error);
+      padding: 15px;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+
+    .info-box {
+      background: rgba(99, 102, 241, 0.08);
+      padding: 14px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      border-left: 4px solid var(--accent);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    footer {
+      background: rgba(99, 102, 241, 0.08);
+      border-top: 2px solid var(--accent);
+      padding: 16px 20px;
+      text-align: center;
+      color: var(--text);
+      font-size: 12px;
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .nav-buttons a {
+      flex: 1;
+      min-width: 100px;
+      text-align: center;
+      padding: 10px;
+      border-radius: 12px;
+      background: transparent;
+      border: 2px solid var(--accent);
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 12px;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .nav-buttons a:hover {
+      background: var(--accent);
+      color:  #000000;
+    }
+
+    .download-btn {
+      display: inline-block;
+      width: 100%;
+      padding: 10px;
+      margin-top: 12px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+      color:  #000000;
+      text-decoration: none;
+      font-weight: 600;
+      text-align: center;
+      transition: all 0.3s;
+    }
+
+    .download-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>🎬 Dynamic Routing Video Generator</h1>
+  <p>Create custom animations showing packet routing with algorithms</p>
+</header>
+
+<main>
+  <div class="container">
+    <!-- Input Panel -->
+    <div class="panel">
+      <h2>Configuration</h2>
+
+      <div class="info-box">
+        Define your network and routing parameters, then generate an animated MP4 video showing real-time packet movement with hop-by-hop visualization.
+      </div>
+
+      <form id="routingForm">
+        <div class="form-group">
+          <label for="num_nodes">Number of Network Nodes</label>
+          <input type="number" id="num_nodes" name="num_nodes" min="5" max="100" required>
+        </div>
+
+        <div class="form-group">
+          <label for="source">Source Node</label>
+          <input type="number" id="source" name="source" placeholder="Enter source node" min="0" max="99" required>
+        </div>
+
+        <div class="form-group">
+          <label for="destination">Destination Node</label>
+          <input type="number" id="destination" name="destination" placeholder="Enter destination node" min="0" max="99" required>
+        </div>
+
+        <div class="form-group">
+          <label for="algorithm">Routing Algorithm</label>
+          <select id="algorithm" name="algorithm" required>
+            <option value="flooding">Flooding (Broadcast)</option>
+            <option value="lorawan">LoRaWAN (Energy-Aware)</option>
+            <option value="energy_aware">Energy-Aware Routing</option>
+          </select>
+        </div>
+
+        <button type="submit" id="generateBtn">Generate Video 🚀</button>
+        <button type="reset" style="background: transparent; border: 2px solid var(--accent); color: var(--accent); margin-top: 10px;">Reset Form</button>
+      </form>
+
+    <div class="nav-buttons">
+        <a href="/input">📊 Dashboard</a>
+        <a href="/history">📜 History</a>
+        <a href="/analytics">📈 Analytics</a>
+        <a href="/logout">🔐 Logout</a>
+      </div>
+    </div>
+
+    <!-- Video Display Panel -->
+    <div class="panel">
+      <h2>Preview</h2>
+
+      <div id="videoDisplay" class="video-section">
+        <div style="color: var(--border); text-align: center; padding: 40px 20px;">
+          <p style="font-size: 14px; margin: 0;">🎬 Your routing animation will appear here</p>
+          <p style="font-size: 12px; margin: 8px 0 0 0; opacity: 0.8;">Configure parameters and click "Generate Video"</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  © 2026 Wireless Sensor Networks Routing System. All rights reserved.
+</footer>
+
+<script>
+  let form = document.getElementById('routingForm');
+  let videoDisplay = document.getElementById('videoDisplay');
+  let generateBtn = document.getElementById('generateBtn');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const numNodes = parseInt(document.getElementById('num_nodes').value);
+    const source = parseInt(document.getElementById('source').value);
+    const dest = parseInt(document.getElementById('destination').value);
+    const algorithm = document.getElementById('algorithm').value;
+
+    // Validate
+    if (source >= numNodes || dest >= numNodes) {
+      videoDisplay.innerHTML = '<div class="error">❌ Error: Node numbers must be less than total nodes</div>';
+      return;
+    }
+
+    if (source === dest) {
+      videoDisplay.innerHTML = '<div class="error">❌ Error: Source and destination must be different</div>';
+      return;
+    }
+
+    // Show loading
+    videoDisplay.innerHTML = '<div class="loading"><div class="spinner"></div><p>Generating routing animation...</p></div>';
+    generateBtn.disabled = true;
+
+    try {
+      const response = await fetch('/generate_routing_video', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ num_nodes: numNodes, source, destination: dest, algorithm })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      if (data.error) {
+        videoDisplay.innerHTML = `<div class="error">❌ Error: ${data.error}</div>`;
+      } else {
+        // Display media (MP4) or GIF fallback and metrics
+        let mediaHtml = '';
+        if (data.format && data.format.toLowerCase() === 'gif') {
+          mediaHtml = `<img src="${data.video_url}" alt="Routing animation" style="width:100%; border-radius:12px; display:block;">`;
+        } else {
+          mediaHtml = `
+            <video controls style="width: 100%; border-radius: 12px; background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);">
+              <source src="${data.video_url}" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>`;
+        }
+
+        let downloadLabel = (data.format && data.format.toLowerCase() === 'gif') ? '⬇️ Download GIF' : '⬇️ Download MP4';
+
+        let html = `
+          ${mediaHtml}
+          <div class="metrics-box">
+            <strong style="color: var(--accent); font-size: 14px;">📊 Routing Metrics</strong>
+            <div class="metrics-grid" style="margin-top: 12px;">
+              <div class="metric-item">
+                <div class="metric-label">Algorithm</div>
+                <div class="metric-value" style="font-size: 14px;">${data.algorithm.toUpperCase()}</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-label">Hops</div>
+                <div class="metric-value">${data.hops}</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-label">Delay</div>
+                <div class="metric-value">${data.delay}ms</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-label">Throughput</div>
+                <div class="metric-value">${data.throughput} Kbps</div>
+              </div>
+            </div>
+            <div class="path-route">
+              <strong>Route:</strong> ${data.path.join(' → ')}
+            </div>
+            <a href="${data.download_url}" class="download-btn" download>${downloadLabel}</a>
+          </div>
+        `;
+        videoDisplay.innerHTML = html;
+      }
+    } catch (error) {
+      videoDisplay.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+    } finally {
+      generateBtn.disabled = false;
+    }
+  });
+
+</script>
+
+</body>
+</html>
+
+<!-- Register service worker for PWA -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/service-worker.js')
+    .then(() => console.log('Service Worker registered'))
+    .catch(err => console.warn('SW registration failed:', err));
+}
+</script>

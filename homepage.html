@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="WSN Routing">
+    <meta name="theme-color" content="#a0826d">
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <title>Cloud controlled LoRaWAN communication smart agriculture gateway load regulation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5efe0 0%, #e0cfb2 50%, #a97c50 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navigation Bar */
+        nav {
+            background: rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            color:  #000000;
+            font-size: 1.8rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo::before {
+            content: "🌾";
+            font-size: 2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color:  #000000;
+            text-decoration: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 12px;
+            background: linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%);
+            border: 2px solid #e5e7eb;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            text-transform: capitalize;
+            display: inline-block;
+        }
+
+        .nav-links a:hover {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            border-color: #10b981;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .nav-links a:active {
+            transform: translateY(0);
+        }
+
+        .nav-links .btn-primary {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border: 2px solid #0284c7;
+            color: #0284c7;
+        }
+
+        .nav-links .btn-primary:hover {
+            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+        }
+
+        /* Main Container */
+        .container {
+            flex: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            color:  #000000;
+            margin-bottom: 4rem;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            opacity: 0.95;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: white;
+            color:  #000000;
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            border: none;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            background: #f0f0f0;
+        }
+
+        /* Features Grid */
+        .features-section {
+            margin-bottom: 3rem;
+        }
+
+        .section-title {
+            color:  #000000;
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            animation: fadeInUp 0.8s ease 0.2s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.25);
+            border-color:  #000000;
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .feature-card h3 {
+            color:  #000000;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .feature-card p {
+            color:  #000000;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-link {
+            color:  #000000;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 10px 16px;
+            border-radius: 6px;
+            background: linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%);
+            border: 2px solid #e5e7eb;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            font-size: 13px;
+        }
+
+        .feature-link:hover {
+            color:  #000000;
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            border-color: #10b981;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+            gap: 0.8rem;
+            transform: translateY(-2px);
+        }
+
+        .feature-link:active {
+            transform: translateY(0);
+        }
+
+        /* Stats Section */
+        .stats-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 3rem;
+            margin-bottom: 3rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            text-align: center;
+        }
+
+        .stat-item h4 {
+            color:  #000000;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-item p {
+            color:  #000000;
+            font-size: 1rem;
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(0, 0, 0, 0.2);
+            color:  #000000;
+            text-align: center;
+            padding: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: auto;
+        }
+
+        footer p {
+            opacity: 0.9;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            nav {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+
+        /* Animation for feature cards */
+        .features-grid .feature-card:nth-child(1) { animation: fadeInUp 0.8s ease 0.2s both; }
+        .features-grid .feature-card:nth-child(2) { animation: fadeInUp 0.8s ease 0.4s both; }
+        .features-grid .feature-card:nth-child(3) { animation: fadeInUp 0.8s ease 0.6s both; }
+        .features-grid .feature-card:nth-child(4) { animation: fadeInUp 0.8s ease 0.8s both; }
+        .features-grid .feature-card:nth-child(5) { animation: fadeInUp 0.8s ease 1s both; }
+        .features-grid .feature-card:nth-child(6) { animation: fadeInUp 0.8s ease 1.2s both; }
+        .features-grid .feature-card:nth-child(7) { animation: fadeInUp 0.8s ease 1.4s both; }
+        .features-grid .feature-card:nth-child(8) { animation: fadeInUp 0.8s ease 1.6s both; }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="logo">Smart Agriculture</div>
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#a0826d">
+    <link rel="apple-touch-icon" href="/static/favicon.svg">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <div class="nav-links">
+            {% if current_user.is_authenticated %}
+                {% if current_user.is_admin %}
+                    <a href="{{ url_for('admin_dashboard') }}">Admin Panel</a>
+                {% endif %}
+                <a href="{{ url_for('logout') }}" class="btn-primary">Logout</a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="btn-primary">Login</a>
+                <a href="{{ url_for('register') }}" class="btn-primary">Sign Up</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Hero Section -->
+        <section class="hero">
+            <h1>🌾 Smart Agriculture Network</h1>
+            <p>Optimize your agricultural IoT network with advanced routing algorithms and performance metrics</p>
+            {% if not current_user.is_authenticated %}
+                <a href="{{ url_for('login') }}" class="cta-button">Get Started Now</a>
+            {% else %}
+                <a href="{{ url_for('input_page') }}" class="cta-button">Go to Dashboard</a>
+            {% endif %}
+        </section>
+
+        <!-- Features Section -->
+        <section class="features-section">
+            <h2 class="section-title">📊 Powerful Features</h2>
+            <div class="features-grid">
+                <!-- Dynamic Video Generator -->
+                <div class="feature-card">
+                    <span class="feature-icon">🎬</span>
+                    <h3>Dynamic Video Generator</h3>
+                    <p>Visualize your network topology with dynamic video demonstrations. Watch your routing algorithms in action with animated network simulations.</p>
+                    <a href="{{ url_for('login') if not current_user.is_authenticated else url_for('dynamic_routing_page') }}" class="feature-link">Explore Videos</a>
+                </div>
+
+                <!-- Performance Metrics -->
+                <div class="feature-card">
+                    <span class="feature-icon">📈</span>
+                    <h3>Performance Metrics</h3>
+                    <p>Real-time monitoring of hop count, delay, throughput, and execution time. Compare algorithm performance side-by-side with detailed analytics.</p>
+                    <a href="{{ url_for('login') if not current_user.is_authenticated else url_for('metrics_page') }}" class="feature-link">View Metrics</a>
+                </div>
+
+                <!-- Comparison Graphs -->
+                <div class="feature-card">
+                    <span class="feature-icon">📊</span>
+                    <h3>Comparison Graphs</h3>
+                    <p>Visual analysis of routing algorithms. Compare performance across different network sizes and configurations.</p>
+                    <a href="{{ url_for('login') if not current_user.is_authenticated else url_for('comparison_graphs') }}" class="feature-link" onclick="window.location.href='/comparison-graphs'; return false;">Compare Algorithms</a>
+                </div>
+
+                <!-- Network Simulator -->
+                <div class="feature-card">
+                    <span class="feature-icon">🌐</span>
+                    <h3>Network Simulator</h3>
+                    <p>Generate and simulate network topologies with configurable parameters. Test routing algorithms on various network scenarios.</p>
+                    <a href="{{ url_for('login') if not current_user.is_authenticated else url_for('network_simulation') }}" class="feature-link">Start Simulation</a>
+                </div>
+
+                <!-- Upload Topology -->
+                <div class="feature-card">
+                    <span class="feature-icon">📤</span>
+                    <h3>Upload Topology</h3>
+                    <p>Import your custom network topologies. Analyze your existing IoT infrastructure with advanced routing calculations.</p>
+                    <a href="{{ url_for('login') if not current_user.is_authenticated else url_for('upload_topology') }}" class="feature-link">Upload File</a>
+                </div>
+
+                <!-- Energy Routing -->
+                <div class="feature-card">
+                    <span class="feature-icon">⚡</span>
+                    <h3>Energy Routing</h3>
+                    <p>Optimize network paths based on energy consumption. Extend battery life in wireless sensor networks with smart routing.</p>
+                    <a href="{{ url_for('login') if not current_user.is_authenticated else url_for('energy_aware_routing') }}" class="feature-link">Explore Energy</a>
+                </div>
+
+                <!-- Analytics Dashboard -->
+                <div class="feature-card">
+                    <span class="feature-icon">📉</span>
+                    <h3>Advanced Analytics</h3>
+                    <p>In-depth analysis of network performance data. Generate reports and export results for further analysis.</p>
+                    <a href="{{ url_for('login') if not current_user.is_authenticated else url_for('analytics') }}" class="feature-link">View Analytics</a>
+                </div>
+
+                <!-- Algorithm Comparison -->
+                <div class="feature-card">
+                    <span class="feature-icon">⚖️</span>
+                    <h3>Algorithm Analysis</h3>
+                    <p>Compare Flooding vs LoRaWAN routing algorithms. Detailed metrics, node structures, and performance analysis for smart agriculture.</p>
+                    <a href="{{ url_for('algorithm_comparison') }}" class="feature-link">Compare Algorithms</a>
+                </div>
+
+                <!-- History -->
+                <div class="feature-card">
+                    <span class="feature-icon">⏱️</span>
+                    <h3>Calculation History</h3>
+                    <p>Keep track of all your routing calculations and simulations. Access historical data to monitor progress and improvements.</p>
+                    <a href="{{ url_for('login') if not current_user.is_authenticated else url_for('history') }}" class="feature-link">View History</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Section -->
+        <section class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <h4>{{ total_calculations | default(0) }}</h4>
+                    <p>Total Calculations</p>
+                </div>
+                <div class="stat-item">
+                    <h4>{{ total_users | default(0) }}</h4>
+                    <p>Active Users</p>
+                </div>
+                <div class="stat-item">
+                    <h4>{{ best_avg_hops | default(0) }}</h4>
+                    <p>Best Avg Hops</p>
+                </div>
+                <div class="stat-item">
+                    <h4>{{ total_calcs | default(0) }}</h4>
+                    <p>Your Calculations</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 Smart Agriculture Network Routing Platform. All rights reserved.</p>
+    
+    <!-- PWA & Service Worker Scripts -->
+    <script>
+    // Register Service Worker for offline support
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/static/service-worker.js')
+                .then(reg => {
+                    console.log('[PWA] Service Worker registered:', reg);
+                    // Check for updates
+                    reg.addEventListener('updatefound', () => {
+                        const worker = reg.installing;
+                        worker.addEventListener('statechange', () => {
+                            if (worker.state === 'installed' && navigator.serviceWorker.controller) {
+                                console.log('[PWA] New version available');
+                                showUpdatePrompt();
+                            }
+                        });
+                    });
+                })
+                .catch(err => console.error('[PWA] Service Worker registration failed:', err));
+        });
+    }
+
+    // Handle install prompt for mobile
+    let deferredPrompt;
+    const installBtn = document.getElementById('install-btn');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        if (installBtn) {
+            installBtn.style.display = 'block';
+        }
+    });
+
+    if (installBtn) {
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`[PWA] User response: ${outcome}`);
+                deferredPrompt = null;
+                installBtn.style.display = 'none';
+            }
+        });
+    }
+
+    window.addEventListener('appinstalled', () => {
+        console.log('[PWA] App installed successfully');
+    });
+
+    // Update prompt notification
+    function showUpdatePrompt() {
+        const msg = document.createElement('div');
+        msg.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: #333;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            z-index: 9999;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        `;
+        msg.innerHTML = `
+            <span>New version available!</span>
+            <button onclick="location.reload()" style="background:#a0826d;color:white;border:none;padding:8px 15px;border-radius:4px;cursor:pointer;">Refresh</button>
+        `;
+        document.body.appendChild(msg);
+    }
+
+    // Request notification permission for PWA features
+    if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission();
+    }
+    </script>
+    </script>
+
+    </footer>
+</body>
+</html>

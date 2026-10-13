@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Metrics Comparison - WSN Routing</title>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<style>
+:root {
+  --bg: linear-gradient(135deg, #e8dcc8 0%, #dab89a 50%, #a0826d 100%);
+  --card: #ffffff;
+  --text:  #000000;
+  --accent: #6366f1;
+  --accent-light: #a5b4fc;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --border: #f8bbd0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 0;
+  transition: background 0.3s ease;
+}
+
+header {
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  color:  #000000;
+  padding: 24px 20px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+}
+
+header h1 {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: 30px 20px;
+  overflow-y: auto;
+}
+
+.container {
+  width: 1200px;
+  max-width: 98%;
+  padding: 30px;
+  border-radius: 15px;
+  background: var(--card);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+h2 {
+  text-align: center;
+  margin: 0 0 30px 0;
+  font-size: 28px;
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color:  #000000;
+  background-clip: text;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.metric-card {
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.metric-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
+  border-color: var(--accent);
+}
+
+.metric-card h3 {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  text-transform: uppercase;
+  color: var(--accent);
+  letter-spacing: 1px;
+}
+
+.metric-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.metric-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background: var(--card);
+  border-radius: 8px;
+  border-left: 4px solid var(--border);
+}
+
+.metric-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.metric-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 30px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.comparison-table thead {
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  color:  #000000;
+}
+
+.comparison-table th {
+  padding: 16px;
+  text-align: left;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 12px;
+}
+
+.comparison-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.comparison-table tbody tr:hover {
+  background: rgba(99, 102, 241, 0.08);
+}
+
+.comparison-table tbody tr:nth-child(1) {
+  background: rgba(30, 144, 255, 0.05);
+}
+
+.comparison-table tbody tr:nth-child(2) {
+  background: rgba(255, 165, 0, 0.05);
+}
+
+.comparison-table tbody tr:nth-child(3) {
+  background: rgba(128, 0, 128, 0.05);
+}
+
+.algo-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.best-indicator {
+  display: inline-block;
+  margin-left: 8px;
+  color: var(--success);
+  font-weight: 700;
+}
+
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.summary-card {
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  color:  #000000;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+
+.summary-card h4 {
+  margin: 0 0 8px 0;
+  font-size: 12px;
+  text-transform: uppercase;
+  opacity: 0.9;
+}
+
+.summary-card .value {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.node-info {
+  text-align: center;
+  margin-bottom: 30px;
+  padding: 16px;
+  background: rgba(99, 102, 241, 0.08);
+  border-radius: 12px;
+  border-left: 4px solid var(--accent);
+}
+
+.node-info strong {
+  color: var(--accent);
+}
+
+.button-group {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 30px;
+  flex-wrap: wrap;
+}
+
+a, button {
+  padding: 12px 24px;
+  border-radius: 12px;
+  border: none;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  color:  #000000;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 2px solid var(--accent);
+  color: var(--accent);
+}
+
+.btn-secondary:hover {
+  background: var(--accent);
+  color:  #000000;
+  transform: translateY(-2px);
+}
+
+.toggle {
+  padding: 11px 24px;
+  border-radius: 12px;
+  border: 2px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  margin-top: 20px;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.toggle:hover {
+  background: var(--accent);
+  color:  #000000;
+  transform: translateY(-2px);
+}
+
+footer {
+  background: rgba(99, 102, 241, 0.08);
+  border-top: 2px solid var(--accent);
+  padding: 20px;
+  text-align: center;
+  color: var(--text);
+  margin-top: auto;
+  font-size: 12px;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 20px;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .comparison-table {
+    font-size: 11px;
+  }
+
+  .comparison-table th,
+  .comparison-table td {
+    padding: 10px;
+  }
+
+  .button-group {
+    flex-direction: column;
+  }
+
+  a, button {
+    width: 100%;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>📊 Performance Metrics Comparison</h1>
+</header>
+
+<main>
+<div class="container">
+  <div class="node-info">
+    Source: <strong style="color:  #000000;">{{ source }}</strong> | Destination: <strong style="color:  #000000;">{{ destination }}</strong>
+  </div>
+
+  <h2>Routing Algorithm Performance Analysis</h2>
+
+  <div class="summary-cards">
+    <div class="summary-card">
+      <h4>🏆 Best for Hops</h4>
+      <div class="value">{{ best_hops_algo }}</div>
+    </div>
+    <div class="summary-card">
+      <h4>⚡ Best for Delay</h4>
+      <div class="value">{{ best_delay_algo }}</div>
+    </div>
+    <div class="summary-card">
+      <h4>🚀 Best Throughput</h4>
+      <div class="value">{{ best_throughput_algo }}</div>
+    </div>
+    <div class="summary-card">
+      <h4>💪 Best Energy</h4>
+      <div class="value">{{ best_energy_algo }}</div>
+    </div>
+    <div class="summary-card">
+      <h4>⚡ Fastest Execution</h4>
+      <div class="value">{{ best_exec_algo }}</div>
+    </div>
+  </div>
+
+  <h3 style="margin-top: 40px; margin-bottom: 20px; color: var(--accent);">📈 Detailed Comparison Table</h3>
+  
+  <table class="comparison-table">
+    <thead>
+      <tr>
+        <th>Algorithm</th>
+        <th>Hop Count</th>
+        <th>Delay (ms)</th>
+        <th>Throughput (Kbps)</th>
+        <th>Packet Loss (%)</th>
+        <th>Energy (J)</th>
+        <th>Execution Time (ms)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for result in results %}
+      <tr>
+        <td>
+          <span class="algo-badge {{ result.algorithm|lower }}">
+            {{ result.algorithm }}
+          </span>
+        </td>
+        <td><strong>{{ result.hops }}</strong></td>
+        <td><strong>{{ result.delay }}</strong></td>
+        <td><strong>{{ result.throughput }}</strong></td>
+        <td><strong>{{ result.packet_loss }}</strong></td>
+        <td><strong>{{ result.energy }}</strong></td>
+        <td><strong>{{ result.exec_time }}</strong></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h3 style="margin-top: 40px; margin-bottom: 20px; color: var(--accent);">📋 Algorithm Insights</h3>
+
+  <div class="metrics-grid">
+
+    <div class="button-group">
+    <a href="/input" class="btn-secondary">← Calculate Another Route</a>
+    <a href="/comparison-graphs" class="btn-primary" onclick="window.location.href='/comparison-graphs'; return false;">📊 Compare Algorithms</a>
+    <a href="/analytics" class="btn-secondary">Analytics →</a>
+    <a href="/" class="btn-primary">Home →</a>
+  </div>
+
+</div>
+</main>
+
+<footer>
+  © 2026 Wireless Sensor Networks Routing System. All rights reserved.
+</footer>
+
+<script>
+
+</script>
+
+</body>
+</html>

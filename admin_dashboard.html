@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Dashboard - WSN Routing</title>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<style>
+:root {
+  --bg: linear-gradient(135deg, #e8dcc8 0%, #dab89a 50%, #a0826d 100%);
+  --card: #ffffff;
+  --text:  #000000;
+  --accent: #6366f1;
+  --accent-light: #a5b4fc;
+  --success: #10b981;
+  --error: #ef4444;
+  --border: #f8bbd0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  color: var(--text);
+  padding: 20px;
+  transition: background 0.3s ease;
+}
+
+header {
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  color:  #000000;
+  padding: 24px 20px;
+  text-align: center;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+  margin-bottom: 30px;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.dashboard {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.stat-card {
+  background: var(--card);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.stat-card h3 {
+  margin: 0 0 10px 0;
+  color: var(--accent);
+  font-size: 14px;
+  text-transform: uppercase;
+}
+
+.stat-card .number {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.section {
+  background: var(--card);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.section h2 {
+  margin-top: 0;
+  color: var(--accent);
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 10px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  font-size: 13px;
+}
+
+thead {
+  background: rgba(99, 102, 241, 0.1);
+}
+
+th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 700;
+  color: var(--accent);
+  border-bottom: 2px solid var(--accent);
+}
+
+td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+tbody tr:hover {
+  background: rgba(99, 102, 241, 0.05);
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+a, button {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  color:  #000000;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 2px solid var(--accent);
+  color: var(--accent);
+}
+
+.btn-secondary:hover {
+  background: var(--accent);
+  color:  #000000;
+}
+
+.toggle {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 2px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  margin-top: 20px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.toggle:hover {
+  background: var(--accent);
+  color:  #000000;
+}
+
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  table {
+    font-size: 11px;
+  }
+
+  th, td {
+    padding: 8px;
+  }
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>⚙️ Admin Dashboard</h1>
+</header>
+
+<div class="dashboard">
+  
+  <div class="stats-grid">
+    <div class="stat-card">
+      <h3>Total Users</h3>
+      <div class="number">{{ total_users }}</div>
+    </div>
+    <div class="stat-card">
+      <h3>Total Calculations</h3>
+      <div class="number">{{ total_calculations }}</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>📊 Recent Calculations</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Source</th>
+          <th>Destination</th>
+          <th>Nodes</th>
+          <th>Created</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for calc in recent_calcs %}
+        <tr>
+          <td><strong>{{ calc.user.username }}</strong></td>
+          <td>{{ calc.source }}</td>
+          <td>{{ calc.destination }}</td>
+          <td>{{ calc.num_nodes }}</td>
+          <td>{{ calc.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>🔒 Audit Logs</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Action</th>
+          <th>Details</th>
+          <th>IP Address</th>
+          <th>Timestamp</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in audit_logs %}
+        <tr>
+          <td><strong>{{ log.user.username }}</strong></td>
+          <td>{{ log.action }}</td>
+          <td>{{ log.details or '-' }}</td>
+          <td>{{ log.ip_address }}</td>
+          <td>{{ log.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="button-group">
+    <a href="/admin/users" class="btn-primary">👥 Manage Users</a>
+    <a href="/input" class="btn-secondary">← Back to Input</a>
+    <button onclick="shutdownServer()" class="btn-danger" style="background: #ef4444; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">⛔ Shutdown Server</button>
+  </div>
+
+</div>
+
+<script>
+async function shutdownServer() {
+  if (!confirm('⚠️ Are you sure you want to shut down the server? This will disconnect all users.')) {
+    return;
+  }
+  
+  try {
+    const response = await fetch('/api/shutdown', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      alert('✅ Server is shutting down...\nPlease wait a few seconds and refresh.');
+      console.log('[SHUTDOWN] Server shutdown initiated');
+    } else {
+      alert('❌ Error: ' + response.statusText);
+    }
+  } catch (error) {
+    console.error('[SHUTDOWN ERROR]', error);
+    alert('❌ Failed to shutdown server: ' + error.message);
+  }
+}
+</script>
+
+</body>
+</html>

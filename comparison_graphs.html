@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Comparison Graphs - WSN Routing</title>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="theme-color" content="#a0826d">
+  <link rel="apple-touch-icon" href="/static/favicon.svg">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root {
+  --bg: linear-gradient(135deg, #e8dcc8 0%, #dab89a 50%, #a0826d 100%);
+  --card: #ffffff;
+  --text:  #000000;
+  --accent: #6366f1;
+  --accent-light: #a5b4fc;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --border: #f8bbd0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 0;
+  transition: background 0.3s ease;
+}
+
+header {
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  color:  #000000;
+  padding: 24px 20px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+header p {
+  margin: 8px 0 0 0;
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+nav {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+nav a {
+  color:  #000000;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 12px;
+  padding: 10px 18px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%);
+  border: 2px solid #e5e7eb;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-transform: capitalize;
+  display: inline-block;
+}
+
+nav a:hover {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border-color: #10b981;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+  transform: translateY(-2px);
+}
+
+nav a:active {
+  transform: translateY(0);
+}
+
+main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: 30px 20px;
+  overflow-y: auto;
+}
+
+.container {
+  width: 1400px;
+  max-width: 98%;
+  padding: 40px;
+  border-radius: 15px;
+  background: var(--card);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+h2 {
+  text-align: center;
+  margin: 0 0 40px 0;
+  font-size: 28px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color:  #000000;
+  background-clip: text;
+}
+
+.controls {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.control-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.control-group label {
+  font-weight: 600;
+  color: var(--accent);
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.control-group select,
+.control-group input {
+  padding: 8px 12px;
+  border: 2px solid var(--accent);
+  border-radius: 6px;
+  background: var(--card);
+  color: var(--text);
+  font-weight: 500;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.3s ease;
+}
+
+.control-group select:hover,
+.control-group input:hover {
+  border-color: var(--accent-light);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
+}
+
+.control-group select:focus,
+.control-group input:focus {
+  outline: none;
+  border-color: var(--accent-light);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+button {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  color:  #000000;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 13px;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.35);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+/* Side-by-side comparison grid */
+.comparison-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-bottom: 40px;
+}
+
+.comparison-section {
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  transition: all 0.3s ease;
+}
+
+.comparison-section:hover {
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.15);
+  border-color: var(--accent-light);
+}
+
+.comparison-section h3 {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  color: var(--accent);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chart-container {
+  position: relative;
+  height: 300px;
+  margin-bottom: 20px;
+}
+
+.chart-container canvas {
+  max-height: 100%;
+}
+
+.metric-value {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.metric-box {
+  background: white;
+  border-left: 4px solid var(--accent);
+  padding: 12px;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.metric-box.alt1 {
+  border-left-color:  #000000;
+}
+
+.metric-box.alt2 {
+  border-left-color:  #000000;
+}
+
+.metric-box.alt3 {
+  border-left-color:  #000000;
+}
+
+/* Feature-based button styles */
+.metric-box.hops {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-left: 4px solid #f59e0b;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+}
+
+.metric-box.hops .metric-value-text {
+  color: #d97706;
+}
+
+.metric-box.delay {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  border-left: 4px solid #ef4444;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+
+.metric-box.delay .metric-value-text {
+  color: #dc2626;
+}
+
+.metric-box.efficiency {
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  border-left: 4px solid #10b981;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.metric-box.efficiency .metric-value-text {
+  color: #059669;
+}
+
+.metric-box.runs {
+  background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+  border-left: 4px solid #8b5cf6;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+}
+
+.metric-box.runs .metric-value-text {
+  color: #6d28d9;
+}
+
+.metric-label {
+  font-size: 11px;
+  font-weight: 600;
+  color:  #000000;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.metric-value-text {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+
+.metric-unit {
+  font-size: 10px;
+  color:  #000000;
+  font-weight: 500;
+}
+
+/* Full width section */
+.full-width {
+  grid-column: 1 / -1;
+}
+
+.full-width .chart-container {
+  height: 350px;
+}
+
+/* Comparison table */
+.table-section {
+  grid-column: 1 / -1;
+  margin-top: 20px;
+}
+
+.comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.comparison-table thead {
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  color:  #000000;
+}
+
+.comparison-table th {
+  padding: 14px;
+  text-align: left;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 12px;
+}
+
+.comparison-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.comparison-table tbody tr:hover {
+  background: rgba(99, 102, 241, 0.08);
+}
+
+.comparison-table tbody tr:nth-child(odd) {
+  background: rgba(99, 102, 241, 0.02);
+}
+
+.algo-badge {
+  display: inline-block;
+  background: var(--accent);
+  color:  #000000;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.ranking-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  color:  #000000;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: 600;
+  font-size: 10px;
+}
+
+/* Stats grid */
+.stats-grid {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.stat-box {
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  color:  #000000;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+}
+
+.stat-box h4 {
+  margin: 0 0 8px 0;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  opacity: 0.9;
+  letter-spacing: 0.5px;
+}
+
+.stat-box .value {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.stat-box .unit {
+  font-size: 11px;
+  opacity: 0.85;
+}
+
+/* Error & Loading states */
+.error-message {
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  border-left: 4px solid var(--error);
+  color: var(--error);
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.spinner {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  border: 4px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-right: 12px;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Footer */
+footer {
+  grid-column: 1 / -1;
+  margin-top: 30px;
+  padding-top: 30px;
+  border-top: 2px solid var(--border);
+  text-align: center;
+  color:  #000000;
+  font-size: 12px;
+}
+
+.button-group {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 12px;
+  margin-top: 30px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.button-group a,
+.button-group button {
+  min-width: 120px;
+  padding: 11px 22px;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  color:  #000000;
+}
+
+.btn-secondary {
+  background: white;
+  border: 2px solid var(--accent);
+  color: var(--accent);
+}
+
+.btn-secondary:hover {
+  background: var(--accent);
+  color:  #000000;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .comparison-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .container {
+    width: 95%;
+    padding: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  header h1 {
+    font-size: 24px;
+  }
+
+  nav {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  nav a {
+    width: 100%;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .controls {
+    flex-direction: column;
+  }
+
+  .control-group {
+    flex-direction: column;
+  }
+
+  .comparison-grid {
+    gap: 15px;
+  }
+
+  .metric-value {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Theme toggle button */
+.theme-toggle {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  border: none;
+  color:  #000000;
+  cursor: pointer;
+  font-size: 24px;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+  transition: all 0.3s ease;
+  z-index: 50;
+}
+
+.theme-toggle:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+}
+
+body.dark .theme-toggle {
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>📊 Side-by-Side Comparison Graphs</h1>
+  <p>Compare routing algorithms and performance metrics in real-time</p>
+  <nav>
+    <a href="/">Dashboard</a>
+    <a href="/input">Routing</a>
+    <a href="/analytics">Analytics</a>
+    <a href="/metrics">Metrics</a>
+    <a href="/network-simulation">Simulation</a>
+    <a href="/logout">Logout</a>
+  </nav>
+</header>
+
+<main>
+  <div class="container">
+    <h2>Algorithm Performance Comparison</h2>
+
+    <div class="controls">
+      <div class="control-group">
+        <label>Algorithm 1:</label>
+        <select id="algo1" onchange="updateComparison()">
+          <option value="flooding">Flooding</option>
+          <option value="lorawan">LoRaWAN</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>Algorithm 2:</label>
+        <select id="algo2" onchange="updateComparison()">
+          <option value="flooding">Flooding</option>
+          <option value="lorawan" selected>LoRaWAN</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>Metric:</label>
+        <select id="metric" onchange="updateComparison()">
+          <option value="hops">Average Hops</option>
+          <option value="delay">Average Delay</option>
+          <option value="efficiency">Efficiency Score</option>
+          <option value="energy">Energy Consumption</option>
+        </select>
+      </div>
+      <button onclick="updateComparison()">🔄 Refresh</button>
+      <button onclick="exportComparison()" class="btn-secondary" style="background: white; border: 2px solid var(--accent); color: var(--accent);">📥 Export</button>
+    </div>
+
+    <div id="stats-section" class="stats-grid" style="display: none;"></div>
+
+    <div id="error-message" class="error-message" style="display: none;"></div>
+
+    <div class="comparison-grid" id="comparison-grid">
+      <!-- Algorithm 1 Comparison -->
+      <div class="comparison-section">
+        <h3>🎯 <span id="algo1-name">Flooding</span> Performance</h3>
+        <div class="chart-container">
+          <canvas id="chart1"></canvas>
+        </div>
+        <div class="metric-value" id="algo1-metrics">
+          <div class="metric-box alt1 hops">
+            <div class="metric-label">Avg Hops</div>
+            <div class="metric-value-text" id="algo1-hops">-</div>
+            <div class="metric-unit">hops</div>
+          </div>
+          <div class="metric-box alt1 delay">
+            <div class="metric-label">Avg Delay</div>
+            <div class="metric-value-text" id="algo1-delay">-</div>
+            <div class="metric-unit">ms</div>
+          </div>
+          <div class="metric-box alt1 efficiency">
+            <div class="metric-label">Efficiency</div>
+            <div class="metric-value-text" id="algo1-efficiency">-</div>
+            <div class="metric-unit">score</div>
+          </div>
+          <div class="metric-box alt1 runs">
+            <div class="metric-label">Runs</div>
+            <div class="metric-value-text" id="algo1-runs">-</div>
+            <div class="metric-unit">total</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Algorithm 2 Comparison -->
+      <div class="comparison-section">
+        <h3>🎯 <span id="algo2-name">LoRaWAN</span> Performance</h3>
+        <div class="chart-container">
+          <canvas id="chart2"></canvas>
+        </div>
+        <div class="metric-value" id="algo2-metrics">
+          <div class="metric-box alt2 hops">
+            <div class="metric-label">Avg Hops</div>
+            <div class="metric-value-text" id="algo2-hops">-</div>
+            <div class="metric-unit">hops</div>
+          </div>
+          <div class="metric-box alt2 delay">
+            <div class="metric-label">Avg Delay</div>
+            <div class="metric-value-text" id="algo2-delay">-</div>
+            <div class="metric-unit">ms</div>
+          </div>
+          <div class="metric-box alt2 efficiency">
+            <div class="metric-label">Efficiency</div>
+            <div class="metric-value-text" id="algo2-efficiency">-</div>
+            <div class="metric-unit">score</div>
+          </div>
+          <div class="metric-box alt2 runs">
+            <div class="metric-label">Runs</div>
+            <div class="metric-value-text" id="algo2-runs">-</div>
+            <div class="metric-unit">total</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Overlay Comparison Chart -->
+      <div class="comparison-section full-width">
+        <h3>📈 Direct Metric Comparison</h3>
+        <div class="chart-container">
+          <canvas id="comparisonChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Comparison Table -->
+      <div class="table-section">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Algorithm</th>
+              <th>Avg Hops</th>
+              <th>Avg Delay (ms)</th>
+              <th>Efficiency Score</th>
+              <th>Total Runs</th>
+              <th>Ranking</th>
+            </tr>
+          </thead>
+          <tbody id="comparison-tbody">
+            <tr>
+              <td colspan="6" style="text-align: center; padding: 40px; color:  #000000;">Loading data...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="button-group">
+        <a href="/input" class="btn-primary">🚀 New Routing</a>
+        <a href="/analytics" class="btn-secondary">📊 Full Analytics</a>
+        <a href="/" class="btn-secondary">🏠 Home</a>
+      </div>
+
+      <footer>
+        WSN Routing System © 2026 | Real-time Performance Analysis
+      </footer>
+    </div>
+  </div>
+</main>
+
+<button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+
+<script>
+let chart1Instance = null;
+let chart2Instance = null;
+let comparisonChartInstance = null;
+
+// Initialize theme
+document.addEventListener('DOMContentLoaded', function() {
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  if (savedTheme === 'dark') {
+    document.body.classList.add('dark');
+    document.querySelector('.theme-toggle').textContent = '☀️';
+  }
+  loadComparisonData();
+});
+
+function toggleTheme() {
+  document.body.classList.toggle('dark');
+  const newTheme = document.body.classList.contains('dark') ? 'dark' : 'light';
+  localStorage.setItem('theme', newTheme);
+  document.querySelector('.theme-toggle').textContent = newTheme === 'dark' ? '☀️' : '🌙';
+  // Refresh charts after theme change
+  setTimeout(updateComparison, 300);
+}
+
+async function loadComparisonData() {
+  try {
+    let response = await fetch('/api/comparison-data');
+    if (!response.ok) {
+      console.warn('/api/comparison-data failed with', response.status);
+      // If auth or other error, try the debug endpoint as a fallback for troubleshooting
+      response = await fetch('/debug/comparison-data');
+    }
+
+    if (!response.ok) throw new Error('Failed to load comparison data from both endpoints');
+
+    const data = await response.json();
+    window.comparisonData = data;
+    updateComparison();
+  } catch (error) {
+    console.error('Error loading data:', error);
+    showError('Unable to load comparison data. Please check your connection.');
+  }
+}
+
+function updateComparison() {
+  if (!window.comparisonData) {
+    loadComparisonData();
+    return;
+  }
+
+  const algo1 = document.getElementById('algo1').value;
+  const algo2 = document.getElementById('algo2').value;
+  const metric = document.getElementById('metric').value;
+
+  const data1 = window.comparisonData[algo1] || {};
+  const data2 = window.comparisonData[algo2] || {};
+
+  // Update algorithm names
+  document.getElementById('algo1-name').textContent = algo1.charAt(0).toUpperCase() + algo1.slice(1);
+  document.getElementById('algo2-name').textContent = algo2.charAt(0).toUpperCase() + algo2.slice(1);
+
+  // Update metrics
+  updateMetrics('algo1', data1);
+  updateMetrics('algo2', data2);
+
+  // Update individual charts
+  updateChart('chart1', algo1, data1, metric);
+  updateChart('chart2', algo2, data2, metric);
+
+  // Update comparison chart
+  updateComparisonChart(algo1, data1, algo2, data2, metric);
+
+  // Update table
+  updateComparisonTable(algo1, data1, algo2, data2);
+}
+
+function updateMetrics(prefix, data) {
+  document.getElementById(`${prefix}-hops`).textContent = (data.avg_hops || 0).toFixed(2);
+  document.getElementById(`${prefix}-delay`).textContent = (data.avg_delay || 0).toFixed(2);
+  document.getElementById(`${prefix}-efficiency`).textContent = (data.efficiency_score || 0).toFixed(2);
+  document.getElementById(`${prefix}-runs`).textContent = data.total_runs || 0;
+}
+
+function updateChart(canvasId, algorithmName, data, metric) {
+  const canvas = document.getElementById(canvasId);
+  const ctx = canvas.getContext('2d');
+  
+  const chartData = {
+    labels: ['Avg Hops', 'Avg Delay', 'Efficiency', 'Runs'],
+    datasets: [{
+      label: algorithmName.charAt(0).toUpperCase() + algorithmName.slice(1),
+      data: [
+        data.avg_hops || 0,
+        data.avg_delay || 0,
+        data.efficiency_score || 0,
+        data.total_runs || 0
+      ],
+      backgroundColor: getAlgoColor(algorithmName, 0.5),
+      borderColor: getAlgoColor(algorithmName, 1),
+      borderWidth: 2,
+      tension: 0.4,
+      fill: true,
+      pointRadius: 6,
+      pointBackgroundColor: getAlgoColor(algorithmName, 1),
+      pointBorderColor: '#fff',
+      pointBorderWidth: 2
+    }]
+  };
+
+  const existingChart = canvasId === 'chart1' ? chart1Instance : chart2Instance;
+  if (existingChart) existingChart.destroy();
+
+  const newChart = new Chart(ctx, {
+    type: 'radar',
+    data: chartData,
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        r: {
+          beginAtZero: true,
+          grid: { color: 'rgba(99, 102, 241, 0.1)' },
+          ticks: { color: 'rgba(0, 0, 0, 0.5)' }
+        }
+      }
+    }
+  });
+
+  if (canvasId === 'chart1') {
+    chart1Instance = newChart;
+  } else {
+    chart2Instance = newChart;
+  }
+}
+
+function updateComparisonChart(algo1, data1, algo2, data2, metric) {
+  const canvas = document.getElementById('comparisonChart');
+  const ctx = canvas.getContext('2d');
+
+  const metrics = ['Avg Hops', 'Avg Delay', 'Efficiency', 'Total Runs'];
+  const chartData = {
+    labels: metrics,
+    datasets: [
+      {
+        label: algo1.charAt(0).toUpperCase() + algo1.slice(1),
+        data: [
+          data1.avg_hops || 0,
+          data1.avg_delay || 0,
+          data1.efficiency_score || 0,
+          data1.total_runs || 0
+        ],
+        backgroundColor: getAlgoColor(algo1, 0.6),
+        borderColor: getAlgoColor(algo1, 1),
+        borderWidth: 2
+      },
+      {
+        label: algo2.charAt(0).toUpperCase() + algo2.slice(1),
+        data: [
+          data2.avg_hops || 0,
+          data2.avg_delay || 0,
+          data2.efficiency_score || 0,
+          data2.total_runs || 0
+        ],
+        backgroundColor: getAlgoColor(algo2, 0.6),
+        borderColor: getAlgoColor(algo2, 1),
+        borderWidth: 2
+      }
+    ]
+  };
+
+  if (comparisonChartInstance) comparisonChartInstance.destroy();
+
+  comparisonChartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: chartData,
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          labels: { color: 'rgba(0, 0, 0, 0.7)', font: { weight: 'bold' } }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: { color: 'rgba(99, 102, 241, 0.1)' },
+          ticks: { color: 'rgba(0, 0, 0, 0.5)' }
+        },
+        x: {
+          grid: { display: false },
+          ticks: { color: 'rgba(0, 0, 0, 0.5)' }
+        }
+      }
+    }
+  });
+}
+
+function updateComparisonTable(algo1, data1, algo2, data2) {
+  const tbody = document.getElementById('comparison-tbody');
+  const row1 = `
+    <tr>
+      <td><span class="algo-badge ${algo1}">${algo1.toUpperCase()}</span></td>
+      <td>${(data1.avg_hops || 0).toFixed(2)}</td>
+      <td>${(data1.avg_delay || 0).toFixed(2)}</td>
+      <td>${(data1.efficiency_score || 0).toFixed(2)}</td>
+      <td>${data1.total_runs || 0}</td>
+      <td>${getRankBadge(data1, data2)}</td>
+    </tr>
+  `;
+  
+  const row2 = `
+    <tr>
+      <td><span class="algo-badge ${algo2}">${algo2.toUpperCase()}</span></td>
+      <td>${(data2.avg_hops || 0).toFixed(2)}</td>
+      <td>${(data2.avg_delay || 0).toFixed(2)}</td>
+      <td>${(data2.efficiency_score || 0).toFixed(2)}</td>
+      <td>${data2.total_runs || 0}</td>
+      <td>${getRankBadge(data2, data1)}</td>
+    </tr>
+  `;
+  
+  tbody.innerHTML = row1 + row2;
+}
+
+function getAlgoColor(algo, opacity) {
+  const colors = {
+    flooding: `rgba(239, 68, 68, ${opacity})`,
+    lorawan: `rgba(16, 185, 129, ${opacity})`
+  };
+  return colors[algo] || `rgba(99, 102, 241, ${opacity})`;
+}
+
+function getRankBadge(data1, data2) {
+  const score1 = (data1.efficiency_score || 0);
+  const score2 = (data2.efficiency_score || 0);
+  
+  if (score1 > score2) {
+    return '<span class="ranking-badge">⭐ WINNER</span>';
+  } else if (score1 < score2) {
+    return '<span class="ranking-badge">🥈 Runner-up</span>';
+  } else {
+    return '<span class="ranking-badge">🤝 Tied</span>';
+  }
+}
+
+function showError(message) {
+  const errorDiv = document.getElementById('error-message');
+  errorDiv.textContent = message;
+  errorDiv.style.display = 'block';
+}
+
+function exportComparison() {
+  const algo1 = document.getElementById('algo1').value;
+  const algo2 = document.getElementById('algo2').value;
+  const data = window.comparisonData;
+
+  const csvContent = [
+    ['Comparison Report'],
+    ['Generated:', new Date().toLocaleString()],
+    [''],
+    ['Algorithm', 'Avg Hops', 'Avg Delay (ms)', 'Efficiency Score', 'Total Runs'],
+    [algo1, data[algo1].avg_hops, data[algo1].avg_delay, data[algo1].efficiency_score, data[algo1].total_runs],
+    [algo2, data[algo2].avg_hops, data[algo2].avg_delay, data[algo2].efficiency_score, data[algo2].total_runs]
+  ].map(row => row.join(',')).join('\n');
+
+  const blob = new Blob([csvContent], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `comparison_${algo1}_vs_${algo2}.csv`;
+  a.click();
+}
+</script>
+<!-- PWA service worker registration -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/service-worker.js')
+    .then(() => console.log('Service Worker registered'))
+    .catch(err => console.warn('SW registration failed:', err));
+}
+</script>
+</body>
+</html>

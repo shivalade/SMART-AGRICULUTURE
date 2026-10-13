@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Calculation History - WSN Routing</title>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<style>
+:root {
+  --bg: linear-gradient(135deg, #e8dcc8 0%, #dab89a 50%, #a0826d 100%);
+  --card: #ffffff;
+  --text:  #000000;
+  --accent: #6366f1;
+  --accent-light: #a5b4fc;
+  --success: #10b981;
+  --error: #ef4444;
+  --border: #f8bbd0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 0;
+  transition: background 0.3s ease;
+}
+
+header {
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  color:  #000000;
+  padding: 24px 20px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+}
+
+header h1 {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+nav {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+nav a {
+  color:  #000000;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 12px;
+  padding: 10px 18px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%);
+  border: 2px solid #e5e7eb;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  text-transform: capitalize;
+  display: inline-block;
+}
+
+nav a:hover {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border-color: #10b981;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+  transform: translateY(-2px);
+}
+
+nav a:active {
+  transform: translateY(0);
+}
+
+main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: 30px 20px;
+  overflow-y: auto;
+}
+
+.container {
+  width: 1200px;
+  max-width: 98%;
+  padding: 30px;
+  border-radius: 15px;
+  background: var(--card);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+h2 {
+  text-align: center;
+  margin: 0 0 30px 0;
+  font-size: 28px;
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color:  #000000;
+  background-clip: text;
+}
+
+.table-section {
+  overflow-x: auto;
+  margin-bottom: 30px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+thead {
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  color:  #000000;
+}
+
+th {
+  padding: 14px;
+  text-align: left;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 12px;
+}
+
+td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+
+tbody tr:hover {
+  background: rgba(99, 102, 241, 0.08);
+}
+
+tbody tr:nth-child(odd) {
+  background: rgba(99, 102, 241, 0.02);
+}
+
+.time-cell {
+  color:  #000000;
+  font-size: 12px;
+}
+
+.routes-badge {
+  display: inline-block;
+  background: var(--accent);
+  color:  #000000;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.action-button {
+  display: inline-block;
+  padding: 8px 14px;
+  background: linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%);
+  color:  #000000;
+  border: 2px solid #e5e7eb;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.action-button:hover {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border-color: #10b981;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.action-button:active {
+  transform: translateY(0);
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+}
+
+.modal-content {
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  margin: 5% auto;
+  padding: 30px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal-content h3 {
+  margin: 0 0 20px 0;
+  font-size: 20px;
+  color: var(--accent);
+}
+
+.close {
+  color:  #000000;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.close:hover {
+  color: var(--accent);
+}
+
+.path-item {
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  border-left: 4px solid var(--accent);
+  padding: 15px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+}
+
+.path-item h4 {
+  margin: 0 0 8px 0;
+  color: var(--accent);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+}
+
+.path-display {
+  background: white;
+  padding: 10px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color:  #000000;
+  overflow-x: auto;
+}
+
+.path-nodes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.node {
+  background: var(--accent);
+  color:  #000000;
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.arrow {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color:  #000000;
+}
+
+.empty-state h3 {
+  font-size: 18px;
+  margin: 0 0 10px 0;
+}
+
+.button-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 30px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  color:  #000000;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.35);
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 2px solid var(--accent);
+  color: var(--accent);
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background: var(--accent);
+  color:  #000000;
+  transform: translateY(-2px);
+}
+
+footer {
+  background: rgba(99, 102, 241, 0.08);
+  border-top: 2px solid var(--accent);
+  padding: 20px;
+  text-align: center;
+  color: var(--text);
+  font-size: 12px;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 20px;
+  }
+
+  header h1 {
+    font-size: 24px;
+  }
+
+  th, td {
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  .action-button {
+    padding: 4px 8px;
+    font-size: 10px;
+  }
+
+  .modal-content {
+    margin: 20% auto;
+    padding: 20px;
+  }
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>📜 Calculation History</h1>
+  <nav>
+    <a href="/input">New Routing</a>
+    <a href="/comparison-graphs">Compare</a>
+    <a href="/analytics">Analytics</a>
+    <a href="/logout">Logout</a>
+  </nav>
+</header>
+
+<main>
+  <div class="container">
+    <h2>📚 Your Routing Calculations</h2>
+
+    {% if calculations %}
+    <div class="table-section">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Source</th>
+            <th>Destination</th>
+            <th>Nodes</th>
+            <th>Date/Time</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for calc in calculations %}
+          <tr>
+            <td><strong>#{{ calc.id }}</strong></td>
+            <td><span class="routes-badge" style="background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);">{{ calc.source }}</span></td>
+            <td><span class="routes-badge" style="background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);">{{ calc.destination }}</span></td>
+            <td>{{ calc.num_nodes }}</td>
+            <td class="time-cell">{{ calc.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+            <td>
+              <button class="action-button" onclick="openModal({{ calc.id }})">👁️ View Paths</button>
+              <a href="{{ url_for('metrics_page', calc_id=calc.id) }}" class="action-button" style="text-decoration: none;">📊 Metrics</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <h3>No calculations yet</h3>
+      <p>Start by creating a new routing calculation</p>
+    </div>
+    {% endif %}
+
+    <div class="button-group">
+      <a href="/input" class="btn-primary">🚀 New Calculation</a>
+      <a href="/" class="btn-secondary">🏠 Home</a>
+    </div>
+  </div>
+</main>
+
+<!-- Modal for viewing paths -->
+<div id="pathModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <h3>Routing Paths</h3>
+    <div id="pathContent"></div>
+  </div>
+</div>
+
+<footer>
+  © 2026 Wireless Sensor Networks Routing System. All rights reserved.
+</footer>
+
+<script>
+async function openModal(calcId) {
+  try {
+    const response = await fetch(`/api/calculation/${calcId}`);
+    if (!response.ok) throw new Error('Failed to load data');
+    
+    const data = await response.json();
+    let html = '';
+    
+    data.paths.forEach(path => {
+      const pathArray = path.path;
+      const pathDisplay = pathArray.map(node => `<span class="node">${node}</span>`).join('<span class="arrow"> → </span>');
+      
+      html += `
+        <div class="path-item">
+          <h4>🎯 ${path.algorithm}</h4>
+          <div class="path-display">
+            <div class="path-nodes">${pathDisplay}</div>
+          </div>
+          <small style="color:  #000000;">Hops: ${path.path_length - 1}</small>
+        </div>
+      `;
+    });
+    
+    document.getElementById('pathContent').innerHTML = html || '<p>No paths available</p>';
+    document.getElementById('pathModal').style.display = 'block';
+  } catch (error) {
+    alert('Error loading paths: ' + error.message);
+  }
+}
+
+function closeModal() {
+  document.getElementById('pathModal').style.display = 'none';
+}
+
+window.onclick = function(event) {
+  const modal = document.getElementById('pathModal');
+  if (event.target == modal) {
+    modal.style.display = 'none';
+  }
+}
+</script>
+</body>
+</html>

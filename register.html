@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Register - WSN Routing</title>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<style>
+:root {
+  --bg: linear-gradient(135deg, #e8dcc8 0%, #dab89a 50%, #a0826d 100%);
+  --card: #ffffff;
+  --text:  #000000;
+  --accent: #6366f1;
+  --accent-light: #a5b4fc;
+  --border: #e8e8e8;
+  --success: #10b981;
+  --error: #ef4444;
+  --warning: #f59e0b;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 0;
+  transition: background 0.3s ease;
+}
+
+header {
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  color:  #000000;
+  padding: 24px 20px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+}
+
+header h1 {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+header p {
+  margin: 8px 0 0 0;
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0.95;
+  letter-spacing: 0.5px;
+}
+
+main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px;
+}
+
+footer {
+  background: rgba(99, 102, 241, 0.08);
+  border-top: 2px solid var(--accent);
+  padding: 32px 20px;
+  text-align: center;
+  color: var(--text);
+  margin-top: auto;
+}
+
+.footer-content {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.footer-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.footer-info {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 30px;
+  margin-bottom: 16px;
+}
+
+.footer-item {
+  flex: 1;
+  min-width: 200px;
+}
+
+.footer-item h3 {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.footer-item p {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.footer-item a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+
+.footer-item a:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+.footer-divider {
+  height: 1px;
+  background: var(--accent);
+  opacity: 0.2;
+  margin: 16px 0;
+}
+
+.footer-bottom {
+  font-size: 12px;
+  color: var(--text);
+  opacity: 0.7;
+  font-weight: 500;
+}
+
+.container {
+  width: 500px;
+  max-width: 95%;
+  padding: 40px;
+  border-radius: 20px;
+  background: var(--card);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.1);
+  animation: slideUp 0.4s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+h2 {
+  text-align: center;
+  margin: 0 0 28px 0;
+  font-size: 28px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color:  #000000;
+  background-clip: text;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--accent);
+}
+
+input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 2px solid var(--border);
+  outline: none;
+  font-size: 14px;
+  background: var(--card);
+  color: var(--text);
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+input:hover {
+  border-color: var(--accent);
+}
+
+input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+input.error {
+  border-color: var(--error);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+input.success {
+  border-color: var(--success);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.error-message {
+  color: var(--error);
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.success-message {
+  color: var(--success);
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.password-strength {
+  margin-top: 8px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.strength-bar {
+  height: 100%;
+  width: 0%;
+  background: var(--error);
+  transition: all 0.3s ease;
+}
+
+.strength-bar.weak {
+  width: 33%;
+  background: var(--error);
+}
+
+.strength-bar.fair {
+  width: 66%;
+  background: var(--warning);
+}
+
+.strength-bar.strong {
+  width: 100%;
+  background: var(--success);
+}
+
+.strength-text {
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+button {
+  width: 100%;
+  padding: 13px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  color:  #000000;
+  font-size: 15px;
+  cursor: pointer;
+  margin-top: 10px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+
+button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 25px rgba(99, 102, 241, 0.4);
+}
+
+button:active {
+  transform: translateY(-1px);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.link-section {
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.link-section p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.link-section a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.link-section a:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+.toggle {
+  background: transparent;
+  border: 2px solid var(--accent);
+  color: var(--accent);
+  padding: 11px;
+  font-size: 14px;
+  width: 100%;
+  margin-top: 16px;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.toggle:hover {
+  background: var(--accent);
+  color:  #000000;
+  transform: translateY(-3px);
+}
+
+.alert {
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.alert-success {
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  border: 2px solid var(--success);
+  color: var(--success);
+}
+
+.alert-error {
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  border: 2px solid var(--error);
+  color: var(--error);
+}
+
+@media (max-width: 600px) {
+  .container {
+    width: 100%;
+    padding: 28px;
+  }
+
+  h2 {
+    font-size: 24px;
+  }
+
+  .footer-info {
+    flex-direction: column;
+    gap: 20px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>� Cloud-Controlled LoRaWAN</h1>
+  <h2>Smart Agriculture System 🚜</h2>
+  <p>🌐 Intelligent Gateway Load Regulation & Wireless Sensor Network Routing</p>
+</header>
+
+<main>
+<div class="container">
+  <h2>Create Account</h2>
+  <h1>🌐 Wireless Sensor Networks</h1>
+  <p>User Registration</p>
+  <form method="POST" action="{{ url_for('register') }}">
+    <div class="form-group">
+      <label for="username">Username</label>
+      <input type="text" id="username" name="username" placeholder="Enter username" required>
+    </div>
+
+    <div class="form-group">
+      <label for="email">Email Address</label>
+      <input type="email" id="email" name="email" placeholder="Enter your email" required>
+    </div>
+
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" placeholder="Create a strong password" required>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-error">⚠️ {{ error }}</div>
+    {% endif %}
+
+    <button type="submit">Register Account</button>
+  </form>
+
+  <div class="link-section">
+    <p>Already have an account? <a href="/login">Login here</a></p>
+  </div>
+
+</div>
+</main>
+
+<footer>
+  <div class="footer-content">
+    <div class="footer-title">📞 For Inquiry & Support</div>
+    
+    <div class="footer-info">
+      <div class="footer-item">
+        <h3>📧 Email</h3>
+        <p><a href="mailto:info@wsn-routing.com">info@wsn-routing.com</a></p>
+      </div>
+      <div class="footer-item">
+        <h3>📱 Phone</h3>
+        <p><a href="tel:+1234567890">+1 (234) 567-890</a></p>
+      </div>
+      <div class="footer-item">
+        <h3>🌍 Website</h3>
+        <p><a href="https://wsn-routing.com" target="_blank">wsn-routing.com</a></p>
+      </div>
+    </div>
+
+    <div class="footer-divider"></div>
+    
+    <div class="footer-bottom">
+      © 2026 Wireless Sensor Networks Routing System. All rights reserved.
+    </div>
+  </div>
+</footer>
+
+<script>
+
+</script>
+
+<script>
+// Validation functions
+function validateFullName(name) {
+  return name.trim().length >= 3;
+}
+
+function validateEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+function validatePassword(password) {
+  // At least 8 characters, 1 uppercase, 1 lowercase, 1 number, 1 special char
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  return passwordRegex.test(password);
+}
+
+function getPasswordStrength(password) {
+  if (password.length === 0) return 'none';
+  
+  let strength = 0;
+  if (password.length >= 8) strength++;
+  if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+  if (/\d/.test(password)) strength++;
+  if (/[@$!%*?&]/.test(password)) strength++;
+  
+  if (strength <= 1) return 'weak';
+  if (strength <= 2) return 'fair';
+  return 'strong';
+}
+
+function isEmailExists(email) {
+  const users = JSON.parse(localStorage.getItem('wsn_users')) || [];
+  return users.some(user => user.email === email.toLowerCase());
+}
+
+// Real-time validation
+document.getElementById('fullName')?.addEventListener('blur', function() {
+  const errorDiv = document.getElementById('fullNameError');
+  if (!validateFullName(this.value)) {
+    this.classList.add('error');
+    this.classList.remove('success');
+    errorDiv.textContent = '❌ Name must be at least 3 characters';
+  } else {
+    this.classList.remove('error');
+    this.classList.add('success');
+    errorDiv.textContent = '✓ Name is valid';
+  }
+});
+
+document.getElementById('email')?.addEventListener('blur', function() {
+  const errorDiv = document.getElementById('emailError');
+  if (!validateEmail(this.value)) {
+    this.classList.add('error');
+    this.classList.remove('success');
+    errorDiv.textContent = '❌ Please enter a valid email';
+  } else if (isEmailExists(this.value)) {
+    this.classList.add('error');
+    this.classList.remove('success');
+    errorDiv.textContent = '❌ Email already registered';
+  } else {
+    this.classList.remove('error');
+    this.classList.add('success');
+    errorDiv.textContent = '✓ Email is valid';
+  }
+});
+
+document.getElementById('password')?.addEventListener('input', function() {
+  const strength = getPasswordStrength(this.value);
+  const strengthBar = document.getElementById('strengthBar');
+  const strengthText = document.getElementById('strengthText');
+  const errorDiv = document.getElementById('passwordError');
+  
+  strengthBar.className = 'strength-bar ' + strength;
+  
+  const strengthLabels = {
+    'none': '',
+    'weak': 'Weak ❌',
+    'fair': 'Fair ⚠️',
+    'strong': 'Strong ✓'
+  };
+  
+  strengthText.textContent = strengthLabels[strength];
+  
+  if (!validatePassword(this.value) && this.value.length > 0) {
+    errorDiv.textContent = '❌ Password must have 8+ chars, uppercase, lowercase, number, and symbol';
+  } else {
+    errorDiv.textContent = '';
+  }
+});
+
+document.getElementById('confirmPassword')?.addEventListener('blur', function() {
+  const password = document.getElementById('password').value;
+  const errorDiv = document.getElementById('confirmPasswordError');
+  
+  if (this.value !== password) {
+    this.classList.add('error');
+    this.classList.remove('success');
+    errorDiv.textContent = '❌ Passwords do not match';
+  } else {
+    this.classList.remove('error');
+    this.classList.add('success');
+    errorDiv.textContent = '✓ Passwords match';
+  }
+});
+
+function handleRegister(event) {
+  event.preventDefault();
+  
+  const fullName = document.getElementById('fullName').value;
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  const confirmPassword = document.getElementById('confirmPassword').value;
+  const alertBox = document.getElementById('alertBox');
+  
+  // Validate all fields
+  let errors = [];
+  
+  if (!validateFullName(fullName)) {
+    errors.push('Name must be at least 3 characters');
+  }
+  
+  if (!validateEmail(email)) {
+    errors.push('Invalid email format');
+  }
+  
+  if (isEmailExists(email)) {
+    errors.push('Email already registered');
+  }
+  
+  if (!validatePassword(password)) {
+    errors.push('Password must have 8+ chars, uppercase, lowercase, number, and symbol');
+  }
+  
+  if (password !== confirmPassword) {
+    errors.push('Passwords do not match');
+  }
+  
+  if (errors.length > 0) {
+    alertBox.innerHTML = `<div class="alert alert-error">❌ ${errors.join('<br>')}</div>`;
+    return;
+  }
+  
+  // Save user to localStorage
+  const users = JSON.parse(localStorage.getItem('wsn_users')) || [];
+  users.push({
+    id: Date.now(),
+    fullName,
+    email: email.toLowerCase(),
+    password: btoa(password) // Simple encoding (not secure for production)
+  });
+  
+  localStorage.setItem('wsn_users', JSON.stringify(users));
+  
+  alertBox.innerHTML = '<div class="alert alert-success">✓ Registration successful! Redirecting to login...</div>';
+  
+  setTimeout(() => {
+    window.location.href = 'login.html';
+  }, 2000);
+}
+
+</script>
+
+</body>
+</html>

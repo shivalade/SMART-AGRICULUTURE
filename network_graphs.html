@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Graph - Flooding vs LoRaWAN</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#a0826d">
+    <link rel="apple-touch-icon" href="/static/favicon.svg">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css" rel="stylesheet" type="text/css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            color:  #000000;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            color:  #000000;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color:  #000000;
+            font-size: 1.1rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color:  #000000;
+            text-decoration: none;
+            padding: 0.7rem 1.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateX(-5px);
+        }
+
+        /* Input Section */
+        .input-section {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-section h2 {
+            color:  #000000;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            color:  #000000;
+            margin-bottom: 0.5rem;
+        }
+
+        input, select {
+            padding: 0.8rem;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color:  #000000;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 0.8rem 2rem;
+            background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+            color:  #000000;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        button:active {
+            transform: translateY(-1px);
+        }
+
+        .secondary-btn {
+            background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+            color:  #000000;
+        }
+
+        .secondary-btn:hover {
+            background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
+        }
+
+        /* Graph Section */
+        .graphs-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .graph-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .graph-header {
+            background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+            color:  #000000;
+            padding: 1.5rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .graph-header.flooding {
+            background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+        }
+
+        .graph-header.lorawan {
+            background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+        }
+
+        .graph-container {
+            width: 100%;
+            height: 500px;
+            position: relative;
+            background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+        }
+
+        .vis-network {
+            width: 100%;
+            height: 100%;
+        }
+
+        .graph-info {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+            border-top: 1px solid #eee;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color:  #000000;
+        }
+
+        .info-value {
+            color:  #000000;
+            font-weight: 600;
+        }
+
+        .flooding .info-value {
+            color:  #000000;
+        }
+
+        .lorawan .info-value {
+            color:  #000000;
+        }
+
+        /* Comparison Section */
+        .comparison-section {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .comparison-section h2 {
+            color:  #000000;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .comparison-card {
+            background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+            border-radius: 10px;
+            padding: 1.5rem;
+            border-left: 5px solid #667eea;
+        }
+
+        .comparison-card.flooding {
+            border-left-color:  #000000;
+        }
+
+        .comparison-card.lorawan {
+            border-left-color:  #000000;
+        }
+
+        .comparison-card h3 {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .comparison-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .comparison-card li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .comparison-card li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color:  #000000;
+            font-weight: bold;
+        }
+
+        .comparison-card.flooding li:before {
+            content: "→";
+            color:  #000000;
+        }
+
+        .comparison-card.lorawan li:before {
+            content: "→";
+            color:  #000000;
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color:  #000000;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 1rem auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Path Info */
+        .path-info {
+            background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .path-info h4 {
+            color:  #000000;
+            margin-bottom: 1rem;
+        }
+
+        .path-nodes {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            font-weight: 600;
+            color:  #000000;
+        }
+
+        .path-node {
+            background: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .path-arrow {
+            color:  #000000;
+            font-size: 1.2rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .graphs-section {
+                grid-template-columns: 1fr;
+            }
+
+            .graph-container {
+                height: 400px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .input-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .error-message {
+            background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+            color:  #000000;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #991b1b;
+        }
+
+        .success-message {
+            background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+            color:  #000000;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #166534;
+        }
+    </style>
+</head>
+<body>
+    <a href="{{ url_for('input_page') }}" class="back-link">← Back to Input</a>
+
+    <div class="container">
+        <header>
+            <h1>📊 Network Graph Visualization</h1>
+            <p class="subtitle">Compare Flooding vs LoRaWAN Routing with Visual Network Representation</p>
+        </header>
+
+        <!-- Input Section -->
+        <div class="input-section">
+            <h2>🔧 Network Configuration</h2>
+            
+            {% if error %}
+            <div class="error-message">⚠️ {{ error }}</div>
+            {% endif %}
+
+            <form id="graphForm" method="POST" action="{{ url_for('network_graphs') }}">
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label for="num_nodes">Number of Nodes</label>
+                        <input type="number" id="num_nodes" name="num_nodes" min="10" max="100" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="source">Source Node</label>
+                        <input type="number" id="source" name="source" min="0" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="destination">Destination Node</label>
+                        <input type="number" id="destination" name="destination" min="0" required>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit">🔄 Generate Graphs</button>
+                    <button type="button" class="secondary-btn" onclick="generateRandomNetwork()">🎲 Random Network</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Graphs Section -->
+        {% if graphs_generated %}
+        <div class="graphs-section">
+            <!-- Flooding Graph -->
+            <div class="graph-card flooding">
+                <div class="graph-header flooding">📶 Flooding Algorithm (Existing)</div>
+                <div class="graph-container" id="floodingGraph"></div>
+                <div class="graph-info flooding">
+                    <div class="path-info">
+                        <h4>🛣️ Flooding Path</h4>
+                        <div class="path-nodes">
+                            {% if flooding_path %}
+                                {% for node in flooding_path %}
+                                    <div class="path-node">Node {{ node }}</div>
+                                    {% if not loop.last %}<div class="path-arrow">→</div>{% endif %}
+                                {% endfor %}
+                            {% else %}
+                                <p>No path found</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">🔗 Hop Count</span>
+                        <span class="info-value">{{ flooding_metrics.hops or 'N/A' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">⏱️ Delay (ms)</span>
+                        <span class="info-value">{{ flooding_metrics.delay or 'N/A' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">📈 Throughput (kbps)</span>
+                        <span class="info-value">{{ flooding_metrics.throughput or 'N/A' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">📦 Packet Loss (%)</span>
+                        <span class="info-value">{{ flooding_metrics.packet_loss or 'N/A' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">🔋 Energy/Packet (mJ)</span>
+                        <span class="info-value">{{ flooding_metrics.energy or 'N/A' }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LoRaWAN Graph -->
+            <div class="graph-card lorawan">
+                <div class="graph-header lorawan">📡 LoRaWAN Algorithm (Proposed)</div>
+                <div class="graph-container" id="lorawanGraph"></div>
+                <div class="graph-info lorawan">
+                    <div class="path-info">
+                        <h4>🛣️ Optimized Path (LoRaWAN)</h4>
+                        <div class="path-nodes">
+                            {% if lorawan_path %}
+                                {% for node in lorawan_path %}
+                                    <div class="path-node">Node {{ node }}</div>
+                                    {% if not loop.last %}<div class="path-arrow">→</div>{% endif %}
+                                {% endfor %}
+                            {% else %}
+                                <p>No path found</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">🔗 Hop Count</span>
+                        <span class="info-value">{{ lorawan_metrics.hops or 'N/A' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">⏱️ Delay (ms)</span>
+                        <span class="info-value">{{ lorawan_metrics.delay or 'N/A' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">📈 Throughput (kbps)</span>
+                        <span class="info-value">{{ lorawan_metrics.throughput or 'N/A' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">📦 Packet Loss (%)</span>
+                        <span class="info-value">{{ lorawan_metrics.packet_loss or 'N/A' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">🔋 Energy/Packet (mJ)</span>
+                        <span class="info-value">{{ lorawan_metrics.energy or 'N/A' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Combined Comparison Graph -->
+        <div class="graph-card" style="margin-top: 2rem; grid-column: 1 / -1;">
+            <div class="graph-header" style="background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%); color:  #000000;">🔄 Combined Comparison (Flooding vs LoRaWAN)</div>
+            <div class="graph-container" id="combinedGraph" style="height: 600px;"></div>
+            <div class="graph-info" style="padding: 1.5rem; background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);">
+                <div style="margin-bottom: 1rem;">
+                    <strong style="color:  #000000; display: block; margin-bottom: 0.5rem;">📊 Color Legend:</strong>
+                    <div style="display: flex; gap: 2rem; flex-wrap: wrap; font-size: 0.9rem;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="display: inline-block; width: 20px; height: 20px; background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%); border-radius: 50%;"></span>
+                            <span>Flooding Path</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="display: inline-block; width: 20px; height: 20px; background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%); border-radius: 50%;"></span>
+                            <span>LoRaWAN Path</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="display: inline-block; width: 20px; height: 20px; background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%); border: 3px solid #047857; border-radius: 50%;"></span>
+                            <span>Source Node</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="display: inline-block; width: 20px; height: 20px; background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%); border: 3px solid #991b1b; border-radius: 50%;"></span>
+                            <span>Destination Node</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparison Section -->
+        <div class="comparison-section" style="margin-top: 2rem;">
+            <h2>⚖️ Algorithm Comparison</h2>
+            <div class="comparison-grid">
+                <div class="comparison-card flooding">
+                    <h3>📶 Flooding (Existing)</h3>
+                    <ul>
+                        <li>Simple implementation</li>
+                        <li>Broadcasts to all neighbors</li>
+                        <li>High energy consumption</li>
+                        <li>More packet loss</li>
+                        <li>Longer delays</li>
+                        <li>Limited scalability</li>
+                    </ul>
+                </div>
+
+                <div class="comparison-card lorawan">
+                    <h3>📡 LoRaWAN (Proposed)</h3>
+                    <ul>
+                        <li>Cloud-controlled routing</li>
+                        <li>Optimized path selection</li>
+                        <li>Energy efficient</li>
+                        <li>Lower packet loss</li>
+                        <li>Reduced delays</li>
+                        <li>Highly scalable</li>
+                    </ul>
+                </div>
+
+                <div class="comparison-card" style="border-left-color:  #000000; background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);">
+                    <h3>📊 Key Improvements</h3>
+                    <ul>
+                        <li>{{ improvement.hops }}% fewer hops</li>
+                        <li>{{ improvement.delay }}% less delay</li>
+                        <li>{{ improvement.throughput }}% higher throughput</li>
+                        <li>{{ improvement.packet_loss }}% lower packet loss</li>
+                        <li>{{ improvement.energy }}% less energy</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Generate random network parameters
+        function generateRandomNetwork() {
+            const nodes = Math.floor(Math.random() * (50 - 20 + 1)) + 20;
+            const src = Math.floor(Math.random() * nodes);
+            let dst = Math.floor(Math.random() * nodes);
+            while (dst === src) {
+                dst = Math.floor(Math.random() * nodes);
+            }
+
+            document.getElementById('num_nodes').value = nodes;
+            document.getElementById('source').value = src;
+            document.getElementById('destination').value = dst;
+            document.getElementById('graphForm').submit();
+        }
+
+        // Visualization data
+        const floodingData = {
+            nodes: new vis.DataSet({{ flooding_network.nodes | tojson | safe }}),
+            edges: new vis.DataSet({{ flooding_network.edges | tojson | safe }})
+        };
+
+        const lorawanData = {
+            nodes: new vis.DataSet({{ lorawan_network.nodes | tojson | safe }}),
+            edges: new vis.DataSet({{ lorawan_network.edges | tojson | safe }})
+        };
+
+        // Network options
+        const options = {
+            physics: {
+                enabled: true,
+                stabilization: {
+                    iterations: 200
+                },
+                barnesHut: {
+                    gravitationalConstant: -26000,
+                    centralGravity: 0.3,
+                    springLength: 200,
+                    springConstant: 0.04
+                }
+            },
+            nodes: {
+                shape: 'dot',
+                scaling: {
+                    label: {
+                        enabled: true,
+                        min: 14,
+                        max: 30
+                    }
+                },
+                font: {
+                    size: 16,
+                    face: 'Segoe UI',
+                    bold: {
+                        size: 18
+                    }
+                }
+            },
+            edges: {
+                width: 2,
+                color: {
+                    color: '#cccccc',
+                    highlight: '#FF0000',
+                    hover: '#FF0000'
+                },
+                smooth: {
+                    type: 'continuous'
+                }
+            },
+            interaction: {
+                hover: true,
+                navigationButtons: true,
+                keyboard: true
+            }
+        };
+
+        // Initialize networks
+        const floodingNetwork = new vis.Network(
+            document.getElementById('floodingGraph'),
+            floodingData,
+            options
+        );
+
+        const lorawanNetwork = new vis.Network(
+            document.getElementById('lorawanGraph'),
+            lorawanData,
+            options
+        );
+
+        // Highlight source and destination nodes with distinct colors/sizes
+        // Flooding
+        {% if flooding_path and flooding_path|length > 0 %}
+        try {
+            const floodingPath = {{ flooding_path | tojson | safe }};
+            const fsrc = floodingPath[0];
+            const fdst = floodingPath[floodingPath.length - 1];
+            floodingData.nodes.update({ id: fsrc, color: { background: '#10b981', border: '#047857' }, size: 30, label: `${fsrc}\n(Source)`, font: { size: 16, bold: { size: 18 } } });
+            floodingData.nodes.update({ id: fdst, color: { background: '#ef4444', border: '#991b1b' }, size: 30, label: `${fdst}\n(Dest)`, font: { size: 16, bold: { size: 18 } } });
+            
+            // Highlight flooding path edges and nodes
+            for (let i = 0; i < floodingPath.length - 1; i++) {
+                floodingData.edges.add({
+                    from: floodingPath[i],
+                    to: floodingPath[i + 1],
+                    color: { color: '#f59e0b' },
+                    width: 4,
+                    title: 'Flooding Route'
+                });
+            }
+            // Highlight intermediate path nodes
+            for (let j = 1; j < floodingPath.length - 1; j++) {
+                floodingData.nodes.update({ id: floodingPath[j], color: { background: '#f59e0b' }, size: 25 });
+            }
+        } catch (e) { console.warn('Flooding highlight failed', e); }
+        {% endif %}
+
+        // LoRaWAN
+        {% if lorawan_path and lorawan_path|length > 0 %}
+        try {
+            const lorawanPath = {{ lorawan_path | tojson | safe }};
+            const lsrc = lorawanPath[0];
+            const ldst = lorawanPath[lorawanPath.length - 1];
+            lorawanData.nodes.update({ id: lsrc, color: { background: '#10b981', border: '#047857' }, size: 30, label: `${lsrc}\n(Source)`, font: { size: 16, bold: { size: 18 } } });
+            lorawanData.nodes.update({ id: ldst, color: { background: '#ef4444', border: '#991b1b' }, size: 30, label: `${ldst}\n(Dest)`, font: { size: 16, bold: { size: 18 } } });
+            
+            // Highlight lorawan path edges and nodes
+            for (let i = 0; i < lorawanPath.length - 1; i++) {
+                lorawanData.edges.add({
+                    from: lorawanPath[i],
+                    to: lorawanPath[i + 1],
+                    color: { color: '#10b981' },
+                    width: 4,
+                    title: 'LoRaWAN Route'
+                });
+            }
+            // Highlight intermediate path nodes
+            for (let j = 1; j < lorawanPath.length - 1; j++) {
+                lorawanData.nodes.update({ id: lorawanPath[j], color: { background: '#10b981' }, size: 25 });
+            }
+        } catch (e) { console.warn('LoRaWAN highlight failed', e); }
+        {% endif %}
+
+        // Combined network data (both paths)
+        const combinedNodes = new vis.DataSet({{ flooding_network.nodes | tojson | safe }});
+        const combinedEdges = new vis.DataSet({{ flooding_network.edges | tojson | safe }});
+
+        // Add Flooding path edges (orange)
+        {% if flooding_path %}
+        try {
+            const floodingPathNodes = {{ flooding_path | tojson | safe }};
+            for (let i = 0; i < floodingPathNodes.length - 1; i++) {
+                combinedEdges.add({
+                    from: floodingPathNodes[i],
+                    to: floodingPathNodes[i + 1],
+                    color: { color: '#f59e0b' },
+                    width: 3,
+                    title: 'Flooding Path'
+                });
+            }
+            // Highlight flooding path nodes
+            for (let node of floodingPathNodes) {
+                if (node === floodingPathNodes[0]) {
+                    combinedNodes.update({ id: node, color: { background: '#10b981', border: '#047857' }, size: 35, label: `${node}\n(Source)` });
+                } else if (node === floodingPathNodes[floodingPathNodes.length - 1]) {
+                    combinedNodes.update({ id: node, color: { background: '#ef4444', border: '#991b1b' }, size: 35, label: `${node}\n(Dest)` });
+                } else {
+                    combinedNodes.update({ id: node, color: { background: '#f59e0b' }, size: 25 });
+                }
+            }
+        } catch (e) { console.warn('Flooding path highlighting failed', e); }
+        {% endif %}
+
+        // Add LoRaWAN path edges (green)
+        {% if lorawan_path %}
+        try {
+            const lorawanPathNodes = {{ lorawan_path | tojson | safe }};
+            for (let i = 0; i < lorawanPathNodes.length - 1; i++) {
+                combinedEdges.add({
+                    from: lorawanPathNodes[i],
+                    to: lorawanPathNodes[i + 1],
+                    color: { color: '#10b981' },
+                    width: 3,
+                    title: 'LoRaWAN Path'
+                });
+            }
+            // Highlight LoRaWAN path nodes
+            for (let node of lorawanPathNodes) {
+                if (node === lorawanPathNodes[0]) {
+                    combinedNodes.update({ id: node, color: { background: '#10b981', border: '#047857' }, size: 35, label: `${node}\n(Source)` });
+                } else if (node === lorawanPathNodes[lorawanPathNodes.length - 1]) {
+                    combinedNodes.update({ id: node, color: { background: '#ef4444', border: '#991b1b' }, size: 35, label: `${node}\n(Dest)` });
+                } else if (combinedNodes.get(node).color.background !== '#f59e0b') {
+                    combinedNodes.update({ id: node, color: { background: '#10b981' }, size: 25 });
+                }
+            }
+        } catch (e) { console.warn('LoRaWAN path highlighting failed', e); }
+        {% endif %}
+
+        const combinedData = {
+            nodes: combinedNodes,
+            edges: combinedEdges
+        };
+
+        // Initialize combined network
+        const combinedNetwork = new vis.Network(
+            document.getElementById('combinedGraph'),
+            combinedData,
+            options
+        );
+
+        // Fit graphs to view
+        setTimeout(() => {
+            floodingNetwork.fit();
+            lorawanNetwork.fit();
+            combinedNetwork.fit();
+        }, 1000);
+    </script>
+</body>
+</html>
+
+    <!-- Register service worker for PWA -->
+    <script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/service-worker.js')
+            .then(() => console.log('Service Worker registered'))
+            .catch(err => console.warn('SW registration failed:', err));
+    }
+    </script>

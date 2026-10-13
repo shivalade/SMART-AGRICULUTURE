@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Simulation - WSN Routing</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); padding: 30px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 3px solid #667eea; padding-bottom: 20px; }
+        .header h1 { color:  #000000; font-size: 28px; }
+        .nav-links a { margin-left: 20px; color:  #000000; text-decoration: none; font-weight: 500; }
+        .nav-links a:hover { text-decoration: underline; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; color:  #000000; font-weight: 600; }
+        input, textarea, select { width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px; font-size: 14px; }
+        input:focus, textarea:focus, select:focus { border-color:  #000000; outline: none; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        button { background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%); color:  #000000; padding: 12px 30px; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 14px; }
+        button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }
+        .error { background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%); color:  #000000; padding: 15px; border-radius: 5px; margin-bottom: 20px; border-left: 4px solid #c33; }
+        .success { background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%); color:  #000000; padding: 15px; border-radius: 5px; margin-bottom: 20px; border-left: 4px solid #3c3; }
+        .results-container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 30px; }
+        .result-card { background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%); padding: 20px; border-radius: 8px; border-left: 4px solid #667eea; }
+        .result-card h3 { color:  #000000; margin-bottom: 15px; }
+        .metric { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
+        .metric-label { color:  #000000; }
+        .metric-value { color:  #000000; font-weight: 600; }
+        .stats-box { background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%); color:  #000000; padding: 20px; border-radius: 8px; margin-top: 20px; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 15px; }
+        .stat-item { text-align: center; }
+        .stat-value { font-size: 24px; font-weight: 700; }
+        .stat-label { font-size: 12px; opacity: 0.9; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Network Failure Simulation</h1>
+            <div class="nav-links">
+                <a href="/input">Routing</a>
+                <a href="/energy-routing">Energy Routing</a>
+                <a href="/analytics">Analytics</a>
+                <a href="/logout">Logout</a>
+            </div>
+        </div>
+
+        {% if error %}
+        <div class="error">❌ {{ error }}</div>
+        {% endif %}
+
+        <form method="POST">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Source Node</label>
+                    <input type="number" name="source" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label>Destination Node</label>
+                    <input type="number" name="destination" min="0" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Number of Nodes</label>
+                    <input type="number" name="num_nodes" min="10" max="100" required>
+                </div>
+                <div class="form-group">
+                    <label>Failed Nodes (comma-separated IDs)</label>
+                    <input type="text" name="failed_nodes" placeholder="e.g., 3,7,12">
+                </div>
+            </div>
+
+            <button type="submit">🚀 Run Simulation</button>
+        </form>
+
+        {% if results %}
+        <div class="success">✅ Simulation completed successfully!</div>
+        
+        <div class="results-container">
+            {% for result in results %}
+            <div class="result-card">
+                <h3>{{ result.algorithm }}</h3>
+                <div class="metric">
+                    <span class="metric-label">Hops:</span>
+                    <span class="metric-value">{{ result.hops }}</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Delay:</span>
+                    <span class="metric-value">{{ result.delay }} ms</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Throughput:</span>
+                    <span class="metric-value">{{ result.throughput }} Mbps</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Exec Time:</span>
+                    <span class="metric-value">{{ result.exec_time }} ms</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="stats-box">
+            <h3 style="margin-bottom: 20px;">📊 Simulation Statistics</h3>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value">{{ success_rate }}%</div>
+                    <div class="stat-label">Success Rate</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">{{ failed_nodes|length }}</div>
+                    <div class="stat-label">Failed Nodes</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">{{ results|length }}/3</div>
+                    <div class="stat-label">Routes Found</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

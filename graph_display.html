@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Graph Display - WSN Routing</title>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<style>
+:root {
+  --bg: linear-gradient(135deg, #e8dcc8 0%, #dab89a 50%, #a0826d 100%);
+  --card: #ffffff;
+  --text:  #000000;
+  --accent: #6366f1;
+  --accent-light: #a5b4fc;
+  --success: #10b981;
+  --error: #ef4444;
+  --border: #f8bbd0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 0;
+  transition: background 0.3s ease;
+}
+
+header {
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  color:  #000000;
+  padding: 24px 20px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+}
+
+header h1 {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: 30px 20px;
+  overflow-y: auto;
+}
+
+.container {
+  width: 1000px;
+  max-width: 98%;
+  padding: 30px;
+  border-radius: 15px;
+  background: var(--card);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+h2 {
+  text-align: center;
+  margin: 0 0 20px 0;
+  font-size: 24px;
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color:  #000000;
+  background-clip: text;
+}
+
+.node-info {
+  text-align: center;
+  margin: 20px 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.graph-section {
+  margin: 30px 0;
+  text-align: center;
+}
+
+.graph-section img {
+  max-width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+}
+
+.graphs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 25px;
+  margin: 40px 0;
+}
+
+.graph-card {
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.graph-card:hover {
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.15);
+  border-color: var(--accent-light);
+  transform: translateY(-4px);
+}
+
+.graph-card h3 {
+  margin: 0 0 15px 0;
+  font-size: 16px;
+  color: var(--accent);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.graph-card.flooding h3 {
+  color:  #000000;
+}
+
+.graph-card.lorawan h3 {
+  color:  #000000;
+}
+
+.graph-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: rgba(99, 102, 241, 0.2);
+  color: var(--accent);
+}
+
+
+.graph-card.flooding .graph-badge {
+  background: rgba(239, 68, 68, 0.12);
+  color:  #000000;
+}
+
+.graph-card.lorawan .graph-badge {
+  background: rgba(5, 150, 105, 0.12);
+  color:  #000000;
+}
+
+.graph-image-container {
+  position: relative;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.graph-card img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 8px;
+}
+
+.graph-info {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color:  #000000;
+}
+
+.path-display {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px;
+  margin-top: 10px;
+  font-size: 12px;
+  font-family: 'Courier New', monospace;
+  color:  #000000;
+  word-break: break-all;
+  overflow-x: auto;
+}
+
+.path-label {
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+
+.path-nodes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.node-badge {
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  color:  #000000;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.graph-card.flooding .node-badge {
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+}
+
+.graph-card.lorawan .node-badge {
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+}
+
+.arrow {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.combined-graph-section {
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 25px;
+  margin: 40px 0;
+}
+
+.combined-graph-section h3 {
+  margin: 0 0 15px 0;
+  font-size: 18px;
+  color: var(--accent);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.button-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 30px;
+  flex-wrap: wrap;
+}
+
+a, button {
+  flex: 1;
+  min-width: 140px;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  color:  #000000;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 2px solid var(--accent);
+  color: var(--accent);
+}
+
+.btn-secondary:hover {
+  background: var(--accent);
+  color:  #000000;
+  transform: translateY(-2px);
+}
+
+.toggle {
+  width: 100%;
+  padding: 11px;
+  border-radius: 12px;
+  border: 2px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  margin-top: 20px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.toggle:hover {
+  background: var(--accent);
+  color:  #000000;
+  transform: translateY(-2px);
+}
+
+footer {
+  background: rgba(99, 102, 241, 0.08);
+  border-top: 2px solid var(--accent);
+  padding: 20px;
+  text-align: center;
+  color: var(--text);
+  margin-top: auto;
+  font-size: 12px;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 20px;
+    width: 100%;
+  }
+
+  h2 {
+    font-size: 18px;
+  }
+
+  .button-group {
+    flex-direction: column;
+  }
+
+  a, button {
+    min-width: auto;
+    width: 100%;
+  }
+
+  .graphs-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+    margin: 20px 0;
+  }
+
+  .graph-card {
+    padding: 15px;
+  }
+
+  .graph-card h3 {
+    font-size: 14px;
+  }
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>🌐 Network Topology</h1>
+</header>
+
+<main>
+<div class="container">
+  <h2>🌐 Network Routing Topology - Algorithm Comparison</h2>
+
+  <div class="node-info">
+    Source: <strong style="color:  #000000;">Node {{ source }}</strong> | Destination: <strong style="color:  #000000;">Node {{ destination }}</strong>
+  </div>
+
+  <!-- Individual Algorithm Graphs -->
+  <div class="graphs-grid">
+    <div class="graph-card flooding">
+      <h3>
+        <span>🔴</span>
+        Flooding (Existing)
+        <span class="graph-badge">Broadcast</span>
+      </h3>
+      <div class="graph-image-container">
+        <img src="{% if image_id %}static/graph_flooding_{{ image_id }}.png{% else %}static/graph_flooding.png{% endif %}" alt="Flooding Graph" onerror="this.src='static/graph_flooding.png'">
+      </div>
+      <div class="graph-info">
+        Simple broadcast-based flooding across network
+      </div>
+      {% if paths and paths.Flooding %}
+      <div class="path-display">
+        <div class="path-label">📍 Route (representative):</div>
+        <div class="path-nodes">
+          {% for node in paths.Flooding %}
+            <span class="node-badge">{{ node }}</span>
+            {% if not loop.last %}<span class="arrow">→</span>{% endif %}
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="graph-card lorawan">
+      <h3>
+        <span>🟢</span>
+        LoRaWAN (Proposed)
+        <span class="graph-badge">Energy-Aware</span>
+      </h3>
+      <div class="graph-image-container">
+        <img src="{% if image_id %}static/graph_lorawan_{{ image_id }}.png{% else %}static/graph_lorawan.png{% endif %}" alt="LoRaWAN Graph" onerror="this.src='static/graph_lorawan.png'">
+      </div>
+      <div class="graph-info">
+        Energy-aware LoRaWAN routing (proposed)
+      </div>
+      {% if paths and paths.LoRaWAN %}
+      <div class="path-display">
+        <div class="path-label">📍 Route Path:</div>
+        <div class="path-nodes">
+          {% for node in paths.LoRaWAN %}
+            <span class="node-badge">{{ node }}</span>
+            {% if not loop.last %}<span class="arrow">→</span>{% endif %}
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Combined Comparison Graph -->
+  <div class="combined-graph-section">
+    <h3>📊 Combined Algorithm Comparison</h3>
+    <p style="color:  #000000; font-size: 13px; margin: 0 0 15px 0;">
+      Red edges highlight Flooding path and Green shows LoRaWAN route.
+    </p>
+    <div class="graph-section">
+      <img src="{% if image_id %}static/graph_{{ image_id }}.png{% else %}static/graph.png{% endif %}" alt="Combined Network Graph">
+    </div>
+  </div>
+
+    <div class="button-group">
+    <a href="/metrics" class="btn-primary">📊 View Performance Metrics →</a>
+    <a href="/comparison-graphs" class="btn-secondary" onclick="window.location.href='/comparison-graphs'; return false;">📈 Compare Algorithms</a>
+    <a href="/input" class="btn-secondary">← New Calculation</a>
+  </div>
+
+</div>
+</main>
+
+<footer>
+  © 2026 Wireless Sensor Networks Routing System. All rights reserved.
+</footer>
+
+<script>
+
+</script>
+
+</body>
+</html>

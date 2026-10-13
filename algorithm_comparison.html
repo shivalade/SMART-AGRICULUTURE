@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algorithm Comparison - Flooding vs LoRaWAN</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.0.0/dist/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            color:  #000000;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            color:  #000000;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color:  #000000;
+            font-size: 1.1rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color:  #000000;
+            text-decoration: none;
+            padding: 0.7rem 1.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateX(-5px);
+        }
+
+        /* Tabs Navigation */
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            background: white;
+            border-radius: 15px;
+            padding: 1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 1rem 2rem;
+            border: 2px solid #eee;
+            background: white;
+            color:  #000000;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover {
+            border-color:  #000000;
+            color:  #000000;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+            color:  #000000;
+            border-color:  #000000;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Node Structure Section */
+        .section {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .section h2 {
+            color:  #000000;
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .node-structure {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .node-card {
+            background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+            border-radius: 10px;
+            padding: 1.5rem;
+            border-left: 5px solid #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .node-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
+        }
+
+        .node-card h4 {
+            color:  #000000;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .node-property {
+            margin-bottom: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .property-label {
+            font-weight: 600;
+            color:  #000000;
+        }
+
+        .property-value {
+            background: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 5px;
+            color:  #000000;
+            font-weight: 600;
+        }
+
+        /* Network Visualization */
+        .network-viz {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        canvas {
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            max-width: 100%;
+            height: auto;
+        }
+
+        .canvas-container {
+            background: white;
+            border-radius: 10px;
+            padding: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Comparison Table */
+        .table-container {
+            overflow-x: auto;
+            margin-top: 2rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        th {
+            background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+            color:  #000000;
+            padding: 1.2rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 3px solid #667eea;
+        }
+
+        td {
+            padding: 1rem 1.2rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        tr:nth-child(even) {
+            background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+        }
+
+        tr:hover {
+            background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+        }
+
+        .metric-excellent {
+            color:  #000000;
+            font-weight: 600;
+        }
+
+        .metric-good {
+            color:  #000000;
+            font-weight: 600;
+        }
+
+        .metric-fair {
+            color:  #000000;
+            font-weight: 600;
+        }
+
+        .metric-poor {
+            color:  #000000;
+            font-weight: 600;
+        }
+
+        /* Algorithm Info */
+        .algo-info {
+            background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+            border-left: 5px solid #667eea;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .algo-info h3 {
+            color:  #000000;
+            margin-bottom: 1rem;
+        }
+
+        .algo-info ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .algo-info li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .algo-info li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color:  #000000;
+            font-weight: bold;
+        }
+
+        /* Path Visualization */
+        .path-info {
+            background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .path-info h4 {
+            color:  #000000;
+            margin-bottom: 1rem;
+        }
+
+        .path-nodes {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            font-weight: 600;
+            color:  #000000;
+        }
+
+        .path-node {
+            background: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .path-arrow {
+            color:  #000000;
+            font-size: 1.5rem;
+        }
+
+        /* Metrics Display */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+            color:  #000000;
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .metric-card h4 {
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-unit {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .node-structure {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .tab-btn {
+                width: 100%;
+            }
+
+            .path-nodes {
+                font-size: 0.9rem;
+            }
+
+            .metric-card {
+                padding: 1rem;
+            }
+
+            .metric-value {
+                font-size: 1.5rem;
+            }
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 1rem;
+        }
+
+        .badge-flooding {
+            background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+            color:  #000000;
+        }
+
+        .badge-lorawan {
+            background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+            color:  #000000;
+        }
+
+        .section-intro {
+            color:  #000000;
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <a href="{{ url_for('home') }}" class="back-link">← Back to Home</a>
+
+    <div class="container">
+        <header>
+            <h1>🌾 Algorithm Comparison Analysis</h1>
+            <p class="subtitle">Cloud controlled LoRaWAN communication smart agriculture gateway load regulation</p>
+        </header>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('overview')">📊 Overview</button>
+            <button class="tab-btn" onclick="switchTab('flooding')">📶 Flooding (Existing)</button>
+            <button class="tab-btn" onclick="switchTab('lorawan')">📡 LoRaWAN (Proposed)</button>
+            <button class="tab-btn" onclick="switchTab('comparison')">⚖️ Comparison</button>
+        </div>
+
+        <!-- OVERVIEW TAB -->
+        <div id="overview" class="tab-content active">
+            <div class="section">
+                <h2>📊 Algorithm Overview</h2>
+                <p class="section-intro">This analysis compares traditional Flooding routing algorithm with the proposed LoRaWAN-based routing for smart agriculture IoT networks.</p>
+
+                <div class="node-structure">
+                    <div class="node-card">
+                        <h4>🌐 Network Type</h4>
+                        <div class="node-property">
+                            <span class="property-label">Topology:</span>
+                            <span class="property-value">Mesh Network</span>
+                        </div>
+                        <div class="node-property">
+                            <span class="property-label">Nodes:</span>
+                            <span class="property-value">25-100</span>
+                        </div>
+                        <div class="node-property">
+                            <span class="property-label">Coverage:</span>
+                            <span class="property-value">Wide Area</span>
+                        </div>
+                    </div>
+
+                    <div class="node-card">
+                        <h4>🔌 Node Specifications</h4>
+                        <div class="node-property">
+                            <span class="property-label">Power:</span>
+                            <span class="property-value">Battery Based</span>
+                        </div>
+                        <div class="node-property">
+                            <span class="property-label">Transmission:</span>
+                            <span class="property-value">LoRa/RF</span>
+                        </div>
+                        <div class="node-property">
+                            <span class="property-label">Range:</span>
+                            <span class="property-value">10-15 km</span>
+                        </div>
+                    </div>
+
+                    <div class="node-card">
+                        <h4>🎯 Gateway</h4>
+                        <div class="node-property">
+                            <span class="property-label">Type:</span>
+                            <span class="property-value">Cloud Gateway</span>
+                        </div>
+                        <div class="node-property">
+                            <span class="property-label">Control:</span>
+                            <span class="property-value">Centralized</span>
+                        </div>
+                        <div class="node-property">
+                            <span class="property-label">Load:</span>
+                            <span class="property-value">Regulated</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FLOODING TAB -->
+        <div id="flooding" class="tab-content">
+            <div class="section">
+                <h2>📶 Flooding Algorithm (Existing) <span class="badge badge-flooding">Existing</span></h2>
+                <p class="section-intro">Traditional flooding routing sends packets to all neighboring nodes, ensuring delivery but at the cost of high bandwidth and energy consumption.</p>
+
+                <div class="algo-info">
+                    <h3>Algorithm Characteristics</h3>
+                    <ul>
+                        <li>Broadcasts packets to all neighbor nodes</li>
+                        <li>Simple implementation and no routing table required</li>
+                        <li>Guaranteed delivery in connected networks</li>
+                        <li>High network congestion and packet duplication</li>
+                        <li>Significant energy consumption on all nodes</li>
+                        <li>Limited scalability with network size</li>
+                    </ul>
+                </div>
+
+                <h3 style="color:  #000000; margin-top: 2rem;">Node Structure</h3>
+                <div class="node-structure">
+                    <div class="node-card">
+                        <h4>🔴 Sensor Node</h4>
+                        <div class="node-property">
+                            <span class="property-label">ID:</span>
+                            <span class="property-value">1-25</span>
+                        </div>
+                        <div class="node-property">
+                            <span class="property-label">Energy:</span>
+                            <span class="property-value">3.7V Battery</span>
+                        </div>
+                        <div class="node-property">
+                            <span class="property-label">Memory:</span>
+                            <span class="property-value">256 KB</span>
+                        </div>
+                    </div>
+
+                    <div class="node-card">
+                        <h4>🟡 Relay Node</h4>
+                        <div class="node-property">
+                            <span class="property-label">Function:</span>
+                            <span class="property-value">Forwarding</span>
+                        </div>
+                        <div class="node-property">
+                            <span class="property-label">Neighbors:</span>
+                            <span class="property-value">3-5 nodes</span>
+                        </div>
+                        <div class="node-property">
+                            <span class="property-label">TTL:</span>
+                            <span class="property-value">Max Hops: 8</span>
+                        </div>
+                    </div>
+
+                    <div class="node-card">
+                        <h4>🟢 Sink Node</h4>
+                        <div class="node-property">
+                            <span class="property-label">Role:</span>
+                            <span class="property-value">Data Collector</span>
+                        </div>
+                        <div class="node-property">
+                            <span class="property-label">Power:</span>
+                            <span class="property-value">Mains Powered</span>
+                        </div>
+                        <div class="node-property">
+                            <span class="property-label">Storage:</span>
+                            <span class="property-value">Unlimited</span>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 style="color:  #000000; margin-top: 2rem;">Example Path Visualization</h3>
+                <div class="path-info">
+                    <h4>Sample Source to Destination Path</h4>
+                    <div class="path-nodes">
+                        <div class="path-node">Source (1)</div>
+                        <div class="path-arrow">→</div>
+                        <div class="path-node">Relay (5)</div>
+                        <div class="path-arrow">→</div>
+                        <div class="path-node">Relay (9)</div>
+                        <div class="path-arrow">→</div>
+                        <div class="path-node">Relay (12)</div>
+                        <div class="path-arrow">→</div>
+                        <div class="path-node">Sink (25)</div>
+                    </div>
+                </div>
+
+                <h3 style="color:  #000000; margin-top: 2rem;">Performance Metrics</h3>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <h4>Hop Count</h4>
+                        <div class="metric-value">4</div>
+                        <div class="metric-unit">hops</div>
+                    </div>
+                    <div class="metric-card">
+                        <h4>Delay</h4>
+                        <div class="metric-value">245</div>
+                        <div class="metric-unit">ms</div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <h4>Throughput</h4>
+                        <div class="metric-value">185</div>
+                        <div class="metric-unit">kbps</div>
+                    </div>
+                    <div class="metric-card">
+                        <h4>Packet Loss</h4>
+                        <div class="metric-value">8.5%</div>
+                        <div class="metric-unit">loss rate</div>
+                    </div>
+                    <div class="metric-card">
+                        <h4>Energy/Packet</h4>
+                        <div class="metric-value">450</div>
+                        <div class="metric-unit">mJ</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LORAWAN TAB -->
+        <div id="lorawan" class="tab-content">
+            <div class="section">
+                <h2>📡 LoRaWAN Algorithm (Proposed) <span class="badge badge-lorawan">Proposed</span></h2>
+                <p class="section-intro">Advanced LoRaWAN-based routing with cloud-controlled gateway load regulation, optimizing for energy efficiency and reliability in agricultural IoT networks.</p>
+
+                <div class="algo-info">
+                    <h3>Algorithm Characteristics</h3>
+                    <ul>
+                        <li>Cloud-controlled centralized routing decision making</li>
+                        <li>Adaptive path selection based on network conditions</li>
+                        <li>Intelligent gateway load balancing</li>
+                        <li>Reduced packet duplication and retransmissions</li>
+                        <li>Optimized energy consumption per hop</li>
+                        <li>Improved scalability for large networks</li>
+                        <li>Real-time QoS monitoring and adjustment</li>
+                    </ul>
+                </div>
+
+                <h3 style="color:  #000000; margin-top: 2rem;">Node Structure</h3>
+                <div class="node-structure">
+                    <div class="node-card">
+                        <h4>🔵 Smart Sensor Node</h4>
+                        <div class="node-property">
+                            <span class="property-label">ID:</span>
+                            <span class="property-value">1-25</span>
+                        </div>
+                        <div class="node-property">
+                            <span class="property-label">Energy:</span>
+                            <span class="property-value">3.7V Battery</span>
+                        </div>
+                        <div class="node-property">
+                            <span class="property-label">Protocol:</span>
+                            <span class="property-value">LoRaWAN 1.1</span>
+                        </div>
+                    </div>
+
+                    <div class="node-card">
+                        <h4>🟣 Intelligent Relay</h4>
+                        <div class="node-property">
+                            <span class="property-label">Function:</span>
+                            <span class="property-value">Smart Forwarding</span>
+                        </div>
+                        <div class="node-property">
+                            <span class="property-label">Learning:</span>
+                            <span class="property-value">AI-based</span>
+                        </div>
+                        <div class="node-property">
+                            <span class="property-label">Optimization:</span>
+                            <span class="property-value">Energy-aware</span>
+                        </div>
+                    </div>
+
+                    <div class="node-card">
+                        <h4>☁️ Cloud Gateway</h4>
+                        <div class="node-property">
+                            <span class="property-label">Role:</span>
+                            <span class="property-value">Centralized Control</span>
+                        </div>
+                        <div class="node-property">
+                            <span class="property-label">Power:</span>
+                            <span class="property-value">Cloud-based</span>
+                        </div>
+                        <div class="node-property">
+                            <span class="property-label">Capacity:</span>
+                            <span class="property-value">Load Regulated</span>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 style="color:  #000000; margin-top: 2rem;">Example Path Visualization</h3>
+                <div class="path-info">
+                    <h4>Optimized Source to Destination Path (via Cloud Control)</h4>
+                    <div class="path-nodes">
+                        <div class="path-node">Source (1)</div>
+                        <div class="path-arrow">→</div>
+                        <div class="path-node">Relay (5)</div>
+                        <div class="path-arrow">→</div>
+                        <div class="path-node">Gateway (Cloud)</div>
+                        <div class="path-arrow">→</div>
+                        <div class="path-node">Sink (25)</div>
+                    </div>
+                </div>
+
+                <h3 style="color:  #000000; margin-top: 2rem;">Performance Metrics</h3>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <h4>Hop Count</h4>
+                        <div class="metric-value">2-3</div>
+                        <div class="metric-unit">hops</div>
+                    </div>
+                    <div class="metric-card">
+                        <h4>Delay</h4>
+                        <div class="metric-value">120</div>
+                        <div class="metric-unit">ms</div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <h4>Throughput</h4>
+                        <div class="metric-value">285</div>
+                        <div class="metric-unit">kbps</div>
+                    </div>
+                    <div class="metric-card">
+                        <h4>Packet Loss</h4>
+                        <div class="metric-value">2.1%</div>
+                        <div class="metric-unit">loss rate</div>
+                    </div>
+                    <div class="metric-card">
+                        <h4>Energy/Packet</h4>
+                        <div class="metric-value">185</div>
+                        <div class="metric-unit">mJ</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COMPARISON TAB -->
+        <div id="comparison" class="tab-content">
+            <div class="section">
+                <h2>⚖️ Detailed Comparison Matrix</h2>
+                <p class="section-intro">Comprehensive metrics comparison between Flooding (Existing) and LoRaWAN (Proposed) routing algorithms.</p>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 25%;">Metric</th>
+                                <th style="width: 25%;">Flooding (Existing)</th>
+                                <th style="width: 25%;">LoRaWAN (Proposed)</th>
+                                <th style="width: 25%;">Improvement</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Average Hop Count</strong></td>
+                                <td class="metric-fair">4 hops</td>
+                                <td class="metric-excellent">2.5 hops</td>
+                                <td class="metric-excellent">↓ 37.5%</td>
+                            </tr>
+                            <tr>
+                                <td><strong>End-to-End Delay</strong></td>
+                                <td class="metric-fair">245 ms</td>
+                                <td class="metric-excellent">120 ms</td>
+                                <td class="metric-excellent">↓ 51%</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Throughput</strong></td>
+                                <td class="metric-fair">185 kbps</td>
+                                <td class="metric-excellent">285 kbps</td>
+                                <td class="metric-excellent">↑ 54%</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Packet Loss Rate</strong></td>
+                                <td class="metric-poor">8.5%</td>
+                                <td class="metric-excellent">2.1%</td>
+                                <td class="metric-excellent">↓ 75%</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Energy per Packet</strong></td>
+                                <td class="metric-poor">450 mJ</td>
+                                <td class="metric-excellent">185 mJ</td>
+                                <td class="metric-excellent">↓ 58.9%</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Network Scalability</strong></td>
+                                <td class="metric-fair">Limited (≤50 nodes)</td>
+                                <td class="metric-excellent">Excellent (100+ nodes)</td>
+                                <td class="metric-excellent">2x larger networks</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Gateway Load</strong></td>
+                                <td class="metric-poor">Unregulated (High)</td>
+                                <td class="metric-excellent">Regulated & Balanced</td>
+                                <td class="metric-excellent">✓ Controlled</td>
+                            </tr>
+                            <tr>
+                                <td><strong>CPU Overhead</strong></td>
+                                <td class="metric-good">Low</td>
+                                <td class="metric-fair">Moderate (Cloud-side)</td>
+                                <td class="metric-good">Offloaded to Cloud</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Route Optimization</strong></td>
+                                <td class="metric-poor">None (Flooding)</td>
+                                <td class="metric-excellent">AI-based & Adaptive</td>
+                                <td class="metric-excellent">✓ Intelligent</td>
+                            </tr>
+                            <tr>
+                                <td><strong>QoS Support</strong></td>
+                                <td class="metric-poor">No</td>
+                                <td class="metric-excellent">Yes (Real-time)</td>
+                                <td class="metric-excellent">✓ Full Support</td>
+                            </tr>
+                            
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="margin-top: 3rem; padding: 2rem; background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%); border-radius: 10px;">
+                    <h3 style="color:  #000000; margin-bottom: 1rem;">Key Findings</h3>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="margin-bottom: 1rem; padding-left: 2rem; position: relative;">
+                            <span style="position: absolute; left: 0; color:  #000000; font-weight: bold;">✓</span>
+                            <strong>Energy Efficiency:</strong> LoRaWAN reduces energy consumption by 58.9%, extending battery life significantly.
+                        </li>
+                        <li style="margin-bottom: 1rem; padding-left: 2rem; position: relative;">
+                            <span style="position: absolute; left: 0; color:  #000000; font-weight: bold;">✓</span>
+                            <strong>Reliability:</strong> Packet loss reduced by 75%, ensuring better data integrity.
+                        </li>
+                        <li style="margin-bottom: 1rem; padding-left: 2rem; position: relative;">
+                            <span style="position: absolute; left: 0; color:  #000000; font-weight: bold;">✓</span>
+                            <strong>Performance:</strong> 51% reduction in latency improves real-time monitoring capabilities.
+                        </li>
+                        <li style="margin-bottom: 1rem; padding-left: 2rem; position: relative;">
+                            <span style="position: absolute; left: 0; color:  #000000; font-weight: bold;">✓</span>
+                            <strong>Scalability:</strong> Supports 2x larger networks with cloud-controlled load regulation.
+                        </li>
+                        <li style="padding-left: 2rem; position: relative;">
+                            <span style="position: absolute; left: 0; color:  #000000; font-weight: bold;">✓</span>
+                            <strong>Intelligence:</strong> AI-based optimization provides adaptive routing for dynamic network conditions.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabName) {
+            // Hide all tab contents
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+
+            // Remove active class from all buttons
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        }
+    </script>
+    <script>
+        // Fetch comparison data and update key metrics on this static page
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const host = window.location.hostname || '127.0.0.1';
+                const ports = [5001, 5000];
+                const paths = ['/api/comparison-data', '/debug/comparison-data'];
+                let resp = null;
+
+                // Try explicit Flask server origins first (both common ports)
+                for (const port of ports) {
+                    for (const p of paths) {
+                        try {
+                            resp = await fetch(`http://${host}:${port}${p}`);
+                            if (resp && resp.ok) break;
+                        } catch (err) {
+                            resp = null;
+                        }
+                    }
+                    if (resp && resp.ok) break;
+                }
+
+                if (!resp || !resp.ok) throw new Error('No comparison data');
+                const data = await resp.json();
+
+                const flooding = data.flooding || {};
+                const lorawan = data.lorawan || {};
+
+                // Update Flooding section: first two metric cards (Hop Count, Delay)
+                    const floodCards = document.querySelectorAll('#flooding .metrics-grid .metric-card .metric-value');
+                if (floodCards && floodCards.length >= 2) {
+                    floodCards[0].textContent = (flooding.avg_hops || 0).toFixed(2);
+                    floodCards[1].textContent = (flooding.avg_delay || 0).toFixed(2);
+                }
+
+                // Update LoRaWAN section
+                const loraCards = document.querySelectorAll('#lorawan .metrics-grid .metric-card .metric-value');
+                if (loraCards && loraCards.length >= 2) {
+                    loraCards[0].textContent = (lorawan.avg_hops || 0).toFixed(2);
+                    loraCards[1].textContent = (lorawan.avg_delay || 0).toFixed(2);
+                }
+
+                // Update comparison table rows for Avg Hop Count and End-to-End Delay
+                const rows = document.querySelectorAll('.table-container table tbody tr');
+                    if (rows && rows.length >= 2) {
+                    // Avg Hop Count row
+                    const fh = (flooding.avg_hops || 0).toFixed(2) + ' hops';
+                    const lh = (lorawan.avg_hops || 0).toFixed(2) + ' hops';
+                    rows[0].cells[1].textContent = fh;
+                    rows[0].cells[2].textContent = lh;
+                    const hopImprovement = flooding.avg_hops ? (((flooding.avg_hops - lorawan.avg_hops) / flooding.avg_hops) * 100).toFixed(1) : '0';
+                    rows[0].cells[3].textContent = (hopImprovement >= 0 ? '↓ ' : '↑ ') + Math.abs(hopImprovement) + '%';
+
+                    // End-to-End Delay row
+                    const fd = (flooding.avg_delay || 0).toFixed(2) + ' ms';
+                    const ld = (lorawan.avg_delay || 0).toFixed(2) + ' ms';
+                    rows[1].cells[1].textContent = fd;
+                    rows[1].cells[2].textContent = ld;
+                    const delayImprovement = flooding.avg_delay ? (((flooding.avg_delay - lorawan.avg_delay) / flooding.avg_delay) * 100).toFixed(1) : '0';
+                    rows[1].cells[3].textContent = (delayImprovement >= 0 ? '↓ ' : '↑ ') + Math.abs(delayImprovement) + '%';
+                    
+                }
+            } catch (e) {
+                console.warn('Comparison update failed:', e);
+            }
+        });
+    </script>
+</body>
+</html>

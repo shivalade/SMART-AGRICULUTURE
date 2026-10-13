@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Login - WSN Routing</title>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<style>
+:root {
+  --bg: linear-gradient(135deg, #e8dcc8 0%, #dab89a 50%, #a0826d 100%);
+  --card: #ffffff;
+  --text:  #000000;
+  --accent: #6366f1;
+  --accent-light: #a5b4fc;
+  --border: #e8e8e8;
+  --success: #10b981;
+  --error: #ef4444;
+  --warning: #f59e0b;
+}
+
+body.dark {
+  --bg: linear-gradient(135deg, #e8dcc8 0%, #dab89a 50%, #a0826d 100%);
+  --card: #16213e;
+  --text:  #000000;
+  --accent: #818cf8;
+  --accent-light: #6366f1;
+  --border: #2d3f5f;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 0;
+  transition: background 0.3s ease;
+}
+
+body.dark {
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+}
+
+header {
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  color:  #000000;
+  padding: 24px 20px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(140, 25, 25, 0.3);
+}
+
+header h1 {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+header p {
+  margin: 8px 0 0 0;
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0.95;
+  letter-spacing: 0.5px;
+}
+
+main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px;
+}
+
+footer {
+  background: rgba(99, 102, 241, 0.08);
+  border-top: 2px solid var(--accent);
+  padding: 32px 20px;
+  text-align: center;
+  color: var(--text);
+  margin-top: auto;
+}
+
+.footer-content {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.footer-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.footer-info {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 30px;
+  margin-bottom: 16px;
+}
+
+.footer-item {
+  flex: 1;
+  min-width: 200px;
+}
+
+.footer-item h3 {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.footer-item p {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.footer-item a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+
+.footer-item a:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+.footer-divider {
+  height: 1px;
+  background: var(--accent);
+  opacity: 0.2;
+  margin: 16px 0;
+}
+
+.footer-bottom {
+  font-size: 12px;
+  color: var(--text);
+  opacity: 0.7;
+  font-weight: 500;
+}
+
+.container {
+  width: 450px;
+  max-width: 95%;
+  padding: 40px;
+  border-radius: 20px;
+  background: var(--card);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.1);
+  animation: slideUp 0.4s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+h2 {
+  text-align: center;
+  margin: 0 0 28px 0;
+  font-size: 28px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color:  #000000;
+  background-clip: text;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--accent);
+}
+
+input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 2px solid var(--border);
+  outline: none;
+  font-size: 14px;
+  background: var(--card);
+  color: var(--text);
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+input:hover {
+  border-color: var(--accent);
+}
+
+input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+input.error {
+  border-color: var(--error);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+input.success {
+  border-color: var(--success);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.error-message {
+  color: var(--error);
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  font-size: 13px;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.remember-me input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--accent);
+}
+
+.forgot-password {
+  cursor: pointer;
+}
+
+.forgot-password a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.forgot-password a:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+button {
+  width: 100%;
+  padding: 13px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  color:  #000000;
+  font-size: 15px;
+  cursor: pointer;
+  margin-top: 10px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+
+button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 25px rgba(99, 102, 241, 0.4);
+}
+
+button:active {
+  transform: translateY(-1px);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.link-section {
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.link-section p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.link-section a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.link-section a:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+.toggle {
+  background: transparent;
+  border: 2px solid var(--accent);
+  color: var(--accent);
+  padding: 11px;
+  font-size: 14px;
+  width: 100%;
+  margin-top: 16px;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.toggle:hover {
+  background: var(--accent);
+  color:  #000000;
+  transform: translateY(-3px);
+}
+
+.alert {
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.alert-success {
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  border: 2px solid var(--success);
+  color: var(--success);
+}
+
+.alert-error {
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  border: 2px solid var(--error);
+  color: var(--error);
+}
+
+@media (max-width: 600px) {
+  .container {
+    width: 100%;
+    padding: 28px;
+  }
+
+  h2 {
+    font-size: 24px;
+  }
+
+  .footer-info {
+    flex-direction: column;
+    gap: 20px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="theme-color" content="#a0826d">
+  <link rel="apple-touch-icon" href="/static/favicon.svg">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<header>
+  <h1>� Cloud-Controlled LoRaWAN</h1>
+  <h2>Smart Agriculture System 🚜</h2>
+  <p>🌐 Intelligent Gateway Load Regulation & Wireless Sensor Network Routing</p>
+</header>
+
+<main>
+<div class="container">
+  <h2>Login Account</h2>
+  <p>User Login</p>
+  <form method="POST" action="{{ url_for('login') }}">
+    <div class="form-group">
+      <label for="username">Username</label>
+      <input type="text" id="username" name="username" placeholder="Enter your username" required>
+    </div>
+
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" placeholder="Enter your password" required>
+    </div>
+
+    {% if error %}
+    <div class="error-message">⚠️ {{ error }}</div>
+    {% endif %}
+
+    <button type="submit">Login</button>
+  </form>
+
+  <div class="link-section">
+    <p>Don't have an account? <a href="/register">Register here</a></p>
+  </div>
+
+  <div style="margin-top: 24px; text-align: center;">
+    <button type="button" class="toggle" onclick="toggleDarkMode()" style="background: transparent; border: 2px solid var(--accent); color: var(--accent); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;">🌙 Night Mode (for farmers)</button>
+  </div>
+
+</div>
+</main>
+
+<script>
+
+</script>
+
+<footer>
+  <div class="footer-content">
+    <div class="footer-title">📞 For Inquiry & Support</div>
+    
+    <div class="footer-info">
+      <div class="footer-item">
+        <h3>📧 Email</h3>
+        <p><a href="mailto:info@wsn-routing.com">b16@gmail.com</a></p>
+      </div>
+      <div class="footer-item">
+        <h3>📱 Phone</h3>
+        <p><a href="tel:+91 9392835668">+91 9392835668</a></p>
+      </div>
+      <div class="footer-item">
+        <h3>🌍 Website</h3>
+        <p><a href="https://wsn-routing.com" target="_blank">wsn-routing.com</a></p>
+      </div>
+    </div>
+
+    <div class="footer-divider"></div>
+    
+    <div class="footer-bottom">
+      © 2026 Wireless Sensor Networks Routing System. All rights reserved. | <a href="#" style="color: var(--accent); text-decoration: none; font-weight: 600;">Privacy Policy</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Validation functions
+function validateEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+function getUserByEmail(email) {
+  const users = JSON.parse(localStorage.getItem('wsn_users')) || [];
+  return users.find(user => user.email === email.toLowerCase());
+}
+
+// Real-time validation
+document.getElementById('email')?.addEventListener('blur', function() {
+  const errorDiv = document.getElementById('emailError');
+  if (!validateEmail(this.value)) {
+    this.classList.add('error');
+    this.classList.remove('success');
+    errorDiv.textContent = '❌ Please enter a valid email';
+  } else {
+    this.classList.remove('error');
+    this.classList.add('success');
+    errorDiv.textContent = '✓ Email is valid';
+  }
+});
+
+document.getElementById('password')?.addEventListener('blur', function() {
+  const errorDiv = document.getElementById('passwordError');
+  if (this.value.length < 6) {
+    this.classList.add('error');
+    this.classList.remove('success');
+    errorDiv.textContent = '❌ Password is required';
+  } else {
+    this.classList.remove('error');
+    this.classList.add('success');
+    errorDiv.textContent = '✓ Password entered';
+  }
+});
+
+function handleLogin(event) {
+  event.preventDefault();
+  
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  const rememberMe = document.getElementById('rememberMe').checked;
+  const alertBox = document.getElementById('alertBox');
+  
+  // Validate email format
+  if (!validateEmail(email)) {
+    alertBox.innerHTML = '<div class="alert alert-error">❌ Invalid email format</div>';
+    return;
+  }
+  
+  // Check if password is entered
+  if (password.length === 0) {
+    alertBox.innerHTML = '<div class="alert alert-error">❌ Password is required</div>';
+    return;
+  }
+  
+  // Find user
+  const user = getUserByEmail(email);
+  
+  if (!user) {
+    alertBox.innerHTML = '<div class="alert alert-error">❌ Email not registered</div>';
+    return;
+  }
+  
+  // Verify password
+  const decodedPassword = atob(user.password);
+  if (decodedPassword !== password) {
+    alertBox.innerHTML = '<div class="alert alert-error">❌ Incorrect password</div>';
+    return;
+  }
+  
+  // Login successful
+  if (rememberMe) {
+    localStorage.setItem('wsn_rememberedEmail', email);
+  } else {
+    localStorage.removeItem('wsn_rememberedEmail');
+  }
+  
+  // Store logged-in user
+  localStorage.setItem('wsn_currentUser', JSON.stringify({
+    id: user.id,
+    fullName: user.fullName,
+    email: user.email
+  }));
+  
+  alertBox.innerHTML = `<div class="alert alert-success">✓ Welcome back, ${user.fullName}! Redirecting...</div>`;
+  
+  setTimeout(() => {
+    window.location.href = 'WEBPAGE.html';
+  }, 2000);
+}
+
+// Load remembered email on page load
+window.addEventListener('load', function() {
+  const rememberedEmail = localStorage.getItem('wsn_rememberedEmail');
+  if (rememberedEmail) {
+    document.getElementById('email').value = rememberedEmail;
+    document.getElementById('rememberMe').checked = true;
+  }
+  // Apply saved theme (dark or light)
+  const savedTheme = localStorage.getItem('wsn_theme');
+  if (savedTheme === 'dark') {
+    document.body.classList.add('dark');
+  }
+});
+
+function toggleDarkMode() {
+  const isDark = document.body.classList.toggle('dark');
+  localStorage.setItem('wsn_theme', isDark ? 'dark' : 'light');
+}
+
+</script>
+
+<!-- Register service worker for PWA -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/service-worker.js')
+    .then(() => console.log('Service Worker registered'))
+    .catch(err => console.warn('SW registration failed:', err));
+}
+</script>
+
+</body>
+</html>

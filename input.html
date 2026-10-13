@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Input - WSN Routing</title>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<style>
+:root {
+  --bg: linear-gradient(135deg, #e8dcc8 0%, #dab89a 50%, #a0826d 100%);
+  --card: #ffffff;
+  --text:  #000000;
+  --accent: #10b981;
+  --accent-light: #6ee7b7;
+  --border: #d1e7d1;
+  --success: #10b981;
+  --error: #ef4444;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 0;
+  transition: background 0.3s ease;
+}
+
+header {
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  color:  #000000;
+  padding: 24px 20px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+}
+
+header h1 {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+header p {
+  margin: 8px 0 0 0;
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0.95;
+  letter-spacing: 0.5px;
+}
+
+main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px;
+}
+
+.container {
+  width: 500px;
+  max-width: 95%;
+  padding: 40px;
+  border-radius: 20px;
+  background: var(--card);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.1);
+  animation: slideUp 0.4s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+h2 {
+  text-align: center;
+  margin: 0 0 32px 0;
+  font-size: 28px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color:  #000000;
+  background-clip: text;
+}
+
+.form-group {
+  margin-bottom: 24px;
+}
+
+label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--accent);
+  font-size: 12px;
+}
+
+input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 2px solid var(--border);
+  outline: none;
+  font-size: 14px;
+  background: var(--card);
+  color: var(--text);
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+input:hover {
+  border-color: var(--accent);
+}
+
+input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.error-message {
+  color: var(--error);
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 12px;
+  padding: 12px;
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  border-radius: 8px;
+  border-left: 4px solid var(--error);
+}
+
+button {
+  width: 100%;
+  padding: 13px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  color:  #000000;
+  font-size: 15px;
+  cursor: pointer;
+  margin-top: 10px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+
+button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 25px rgba(99, 102, 241, 0.4);
+}
+
+.toggle {
+  background: transparent;
+  border: 2px solid var(--accent);
+  color: var(--accent);
+  padding: 11px;
+  margin-top: 16px;
+  transition: all 0.3s ease;
+}
+
+.toggle:hover {
+  background: var(--accent);
+  color:  #000000;
+  transform: translateY(-3px);
+}
+
+/* Video section styles (separate from toggle hover) */
+.video-section {
+  display: none;
+  margin-top: 32px;
+  padding-top: 32px;
+  border-top: 2px solid var(--border);
+}
+
+.video-section.active {
+  display: block;
+}
+
+.video-container {
+  width: 100%;
+  border-radius: 12px;
+  background: var(--text);
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.video-container video {
+  width: 100%;
+  display: block;
+}
+
+.metrics-box {
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.metric-item {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 12px;
+  border-radius: 8px;
+  border-left: 3px solid var(--success);
+  text-align: center;
+}
+
+.metric-label {
+  color: var(--border);
+  font-size: 11px;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.metric-value {
+  color: var(--success);
+  font-weight: 700;
+  font-size: 18px;
+  margin-top: 6px;
+}
+
+.path-route {
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 8px;
+  padding: 12px;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  color: var(--accent);
+  margin-top: 15px;
+}
+
+.spinner {
+  border: 3px solid rgba(99, 102, 241, 0.2);
+  border-top: 3px solid var(--accent);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 20px auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.loading p {
+  color: var(--text);
+  margin-top: 15px;
+  font-weight: 600;
+}
+
+.download-btn {
+  display: inline-block;
+  width: 100%;
+  padding: 10px;
+  margin-top: 12px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #f6f7f9 0%, #eef1f3 50%, #e3e7ea 100%);
+  color:  #000000;
+  text-decoration: none;
+  font-weight: 600;
+  text-align: center;
+  transition: all 0.3s;
+  border: none;
+  cursor: pointer;
+}
+
+.download-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}
+
+footer {
+  background: rgba(99, 102, 241, 0.08);
+  border-top: 2px solid var(--accent);
+  padding: 16px 20px;
+  text-align: center;
+  color: var(--text);
+  margin-top: auto;
+  font-size: 12px;
+}
+
+</style>
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="theme-color" content="#a0826d">
+  <link rel="apple-touch-icon" href="/static/favicon.svg">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+
+<body>
+
+<header>
+  <h1>🌐 Smart Agriculture Network</h1>
+  <p>Multi-Algorithm Route Computation for Wireless Sensor Networks</p>
+</header>
+
+<main>
+<div class="container">
+  <h2>Calculate Optimal Routes</h2>
+  
+    <div style="background: rgba(99, 102, 241, 0.08); padding: 16px; border-radius: 12px; margin-bottom: 24px; border-left: 4px solid var(--accent);">
+    <p style="margin: 0; font-size: 13px; line-height: 1.6; color: var(--text);">
+      Select source and destination nodes to compute optimal routes using supported routing algorithms:
+      <strong>Flooding</strong> and <strong>LoRaWAN</strong> (low-power wide-area).
+    </p>
+  </div>
+
+  <form method="post" action="/input">
+    <div class="form-group">
+      <label for="source">Source Node</label>
+      <input
+        type="number"
+        id="source"
+        name="source"
+        placeholder="Enter source node (0-24)"
+        min="0"
+        max="24"
+        required
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="destination">Destination Node</label>
+      <input
+        type="number"
+        id="destination"
+        name="destination"
+        placeholder="Enter destination node (0-24)"
+        min="0"
+        max="24"
+        required
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="num_nodes">Number of Network Nodes</label>
+      <input
+        type="number"
+        id="num_nodes"
+        name="num_nodes"
+        placeholder="Network size (default: 25)"
+        min="5"
+        max="100"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="radius">Network Radius (0.1-1.0)</label>
+      <input
+        type="number"
+        id="radius"
+        name="radius"
+        placeholder="Connection radius (default: 0.4)"
+        min="0.1"
+        max="1.0"
+        step="0.1"
+      />
+    </div>
+
+    {% if error %}
+    <div class="error-message">⚠️ {{ error }}</div>
+    {% endif %}
+
+    <button type="submit">Calculate Routes →</button>
+  </form>
+</div>
+</main>
+
+<footer>
+</footer>
+
+<!-- Register service worker for PWA -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/service-worker.js')
+    .then(() => console.log('Service Worker registered'))
+    .catch(err => console.warn('SW registration failed:', err));
+}
+</script>
+
+</footer>
+
+<script>
+
+</script>
+
+</body>
+</html>
